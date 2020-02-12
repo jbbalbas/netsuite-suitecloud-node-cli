@@ -4,11 +4,14 @@
   "license": "UPL-1.0",
   "private": true,
   "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "jest": "^24.7.1",
     "lerna": "^3.20.2"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test --stream",
-    "postinstall": "lerna bootstrap"
+    "postinstall": "npm run bootstrap",
+    "build": "lerna run build --stream"
   }
 }

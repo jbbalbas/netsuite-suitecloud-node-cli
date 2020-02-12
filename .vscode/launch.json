@@ -4,34 +4,23 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
- 
-        {
-            "type": "extensionHost",
-            "request": "launch",
-            "name": "Launch SuiteCloud Extension",
-            "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-extension"],
-            "outFiles": ["${workspaceFolder}/packages/vscode-extension/out/**/*.js"],
-            "preLaunchTask": "${defaultBuildTask}"
-        },
-        {
-            "name": "Extension Tests for SuiteCloud Extension",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-extension", "--extensionTestsPath=${workspaceFolder}/packages/vscode-extension/out/test/suite/index"],
-            "outFiles": ["${workspaceFolder}/packages/vscode-extension/out/test/**/*.js"],
-            "preLaunchTask": "${defaultBuildTask}"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch suitecloud project:deploy",
-            "program": "${workspaceFolder}\\packages\\node-cli\\src\\suitecloud.js",
-            "cwd": "C:\\NetSuiteProjects\\SuiteCloudProjectPath",
-            "args": ["project:deploy"],
-            "outputCapture": "std",
-            "console": "integratedTerminal"
-        }
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Suitecloud setupaccoun",
+        "program": "${workspaceFolder}/packages/node-cli/src/suitecloud.ts",
+        "args": ["--help"],
+        "outFiles": ["${workspaceFolder}packages/node-cli/dist/**/*.js"]
+      },
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Suitecloud suitecommerce:localserver",
+        "program": "${workspaceFolder}/packages/node-cli/dist/suitecloud.ts",
+        "protocol": "inspector",
+        "args": ["suitecommerce:localserver, -i"],
+        "cwd": "${workspaceFolder}/../../com.netsuite.testing",
+        "outFiles": ["${workspaceFolder}packages/node-cli/dist/**/*.js"]
+      }
     ]
-}
+  }
