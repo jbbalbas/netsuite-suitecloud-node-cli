@@ -6,22 +6,22 @@
 import BaseCommandGenerator from './BaseCommandGenerator';
 import LocalCommand from '@oracle/suitecloud-cli-localserver-command';
 
-import * as NodeUtils from './../utils/NodeUtils';
+import { COLORS } from '../loggers/LoggerConstants';
 import { COMMAND_LOCAL } from './../services/TranslationKeys';
-import TranslationService from './../services/TranslationService';
+import NodeTranslationService from './../services/NodeTranslationService';
 import { LocalCommandOptions } from '../../types/CommandOptions';
 import { Prompt } from '../../types/Prompt';
 import FileSystemService from '../services/FileSystemService';
 
-export default class LocalCommandGenerator extends BaseCommandGenerator<LocalCommandOptions, any> {
+export default class LocalServerCommandGenerator extends BaseCommandGenerator<LocalCommandOptions, any> {
 	local: any;
 
 	constructor(options: LocalCommandOptions) {
 
 		super(options);
 		options.filesystem = FileSystemService;
-		options.colors = NodeUtils.COLORS;
-		options.translation = [TranslationService, COMMAND_LOCAL];
+		options.colors = COLORS;
+		options.translation = [NodeTranslationService, COMMAND_LOCAL];
 
 		this.local = new LocalCommand(options);
 	}
