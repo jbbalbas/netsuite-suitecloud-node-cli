@@ -3,100 +3,74 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const assert = require('assert');
+import assert from 'assert';
 
-const STATUS = {
+export const STATUS = {
 	ERROR: 'ERROR',
 	SUCCESS: 'SUCCESS',
 };
 
-class ActionResult {
-	constructor(parameters) {
-		this.validateParameters(parameters);
-		this._status = parameters.status;
-		this._data = parameters.data;
-		this._resultMessage = parameters.resultMessage;
-		this._errorMessages = parameters.errorMessages;
-		this._projectFolder = parameters.projectFolder;
-	}
-
-	validateParameters(parameters) {
-		assert(parameters);
-		assert(parameters.status, 'status is required when creating an ActionResult object.');
-		if (parameters.status === STATUS.SUCCESS) {
-			assert(parameters.data, 'data is required when ActionResult is a success.');
-		}
-		if (parameters.status === STATUS.ERROR) {
-			assert(parameters.errorMessages, 'errorMessages is required when ActionResult is an error.');
-			assert(Array.isArray(parameters.errorMessages), 'errorMessages argument must be an array');
-		}
-	}
-
-	get status() {
-		return this._status;
-	}
-
-	get errorMessages() {
-		return this._errorMessages;
-	}
-
-	get data() {
-		return this._data;
-	}
-
-	get resultMessage() {
-		return this._resultMessage;
-	}
-
-	get projectFolder() {
-		return this._projectFolder;
-	}
-
-	static get Builder() {
-		return new ActionResultBuilder();
-	}
-
-	static get STATUS() {
-		return STATUS;
-	}
+export interface ActionResult<T> {
+	status: string;
+	data: T;
+	resultMessage: string;
+	errorMessages: string[];
+	projectFolder: string;
 }
 
-class ActionResultBuilder {
+export class ActionResultBuilder<T> {
+
+	public status!: string;
+	public data!: T;
+	public resultMessage!: string;
+	public errorMessages!: string[];
+	public projectFolder!: string;
+
 	constructor() {}
 
 	// Used to add message on success only, error messages must never be passed
-	withResultMessage(resultMessage) {
+	withResultMessage(resultMessage: string) {
 		this.resultMessage = resultMessage;
 		return this;
 	}
 
-	withData(data) {
+	withData(data: any) {
 		this.status = STATUS.SUCCESS;
 		this.data = data;
 		return this;
 	}
 
-	withErrors(errorMessages) {
+	withErrors(errorMessages: string[]) {
 		this.status = STATUS.ERROR;
 		this.errorMessages = errorMessages;
 		return this;
 	}
 
-	withProjectFolder(projectFolder) {
+	withProjectFolder(projectFolder: string) {
 		this.projectFolder = projectFolder;
 		return this;
 	}
 
-	build() {
-		return new ActionResult({
+	validate() {
+		assert(this);
+		assert(this.status, 'status is required when creating an ActionResult object.');
+		if (this.status === STATUS.SUCCESS) {
+			assert(this.data, 'data is required when ActionResult is a success.');
+		}
+		if (this.status === STATUS.ERROR) {
+			assert(this.errorMessages, 'errorMessages is required when ActionResult is an error.');
+			assert(Array.isArray(this.errorMessages), 'errorMessages argument must be an array');
+		}
+	}
+
+	build() : ActionResult<T> {
+		this.validate();
+		return {
 			status: this.status,
-			...(this.data && { data: this.data }),
-			...(this.resultMessage && { resultMessage: this.resultMessage }),
-			...(this.errorMessages && { errorMessages: this.errorMessages }),
-			...(this.projectFolder && { projectFolder: this.projectFolder }),
-		});
+			data: this.data,
+			resultMessage: this.resultMessage,
+			errorMessages: this.errorMessages,
+			projectFolder: this.projectFolder,
+		};
 	}
 }
-
-module.exports.ActionResult = ActionResult;
-module.exports.ActionResultBuilder = ActionResultBuilder;

@@ -3,28 +3,26 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
-const {
-	COMMAND_PROXY: { MESSAGES },
-} = require('../../services/TranslationKeys');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
+import { COMMAND_PROXY } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { ProxyActionResult } from '../actionresult/ProxyActionResult';
 
-class ProxyOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+export default class ProxyOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
+	public formatActionResult(actionResult: ProxyActionResult) {
 		if (actionResult.isSettingProxy) {
 			if (actionResult.isProxyOverridden) {
-				this.consoleLogger.result(NodeTranslationService.getMessage(MESSAGES.PROXY_OVERRIDDEN, actionResult.proxyUrl));
+				this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_PROXY.MESSAGES.PROXY_OVERRIDDEN, actionResult.proxyUrl));
 			} else {
-				this.consoleLogger.result(NodeTranslationService.getMessage(MESSAGES.SUCCESFULLY_SETUP, actionResult.proxyUrl));
+				this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_PROXY.MESSAGES.SUCCESFULLY_SETUP, actionResult.proxyUrl));
 			}
 		} else {
-			this.consoleLogger.result(NodeTranslationService.getMessage(MESSAGES.SUCCESFULLY_CLEARED));
+			this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_PROXY.MESSAGES.SUCCESFULLY_CLEARED));
 		}
 	}
 }
-
-module.exports = ProxyOutputFormatter;

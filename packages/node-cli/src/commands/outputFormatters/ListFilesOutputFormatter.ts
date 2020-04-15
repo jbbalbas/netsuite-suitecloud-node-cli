@@ -3,15 +3,19 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const ActionResultUtils = require('../../utils/ActionResultUtils');
+import OutputFormatter from './OutputFormatter';
+import * as ActionResultUtils from '../../utils/ActionResultUtils';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { ActionResult } from '../actionresult/ActionResult';
 
-class ListFilesOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+type ListFilesData = string[];
+
+export default class ListFilesOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
+	public formatActionResult(actionResult: ActionResult<ListFilesData>) {
 		ActionResultUtils.logResultMessage(actionResult, this.consoleLogger);
 
 		if (Array.isArray(actionResult.data)) {
@@ -21,5 +25,3 @@ class ListFilesOutputFormatter extends OutputFormatter {
 		}
 	}
 }
-
-module.exports = ListFilesOutputFormatter;

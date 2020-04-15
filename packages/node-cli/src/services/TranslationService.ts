@@ -4,7 +4,10 @@
  */
 'use strict';
 
-class TranslationService {
+export default class TranslationService {
+
+	protected MESSAGES!: {[x: string]: string};
+
 	private injectParameters(message: string, params: string[]) {
 		return message.replace(/{(\d+)}/g, function (match, number) {
 			return typeof params[number] !== 'undefined' ? params[number] : match;
@@ -12,12 +15,11 @@ class TranslationService {
 	}
 
 	public getMessage(key: string, ...params: string[]) {
-		let message = this._MESSAGES[key];	
+		let message = this.MESSAGES[key];
 		if (params && params.length > 0) {
-			return injectParameters(message, params);
+			return this.injectParameters(message, params);
 		}
 
 		return message;
 	}
 }
-export default TranslationService;

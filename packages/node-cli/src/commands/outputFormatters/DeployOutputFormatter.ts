@@ -3,30 +3,30 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
-const ActionResultUtils = require('../../utils/ActionResultUtils');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
+import * as ActionResultUtils from '../../utils/ActionResultUtils';
 
-const { PROJECT_SUITEAPP, SDK_TRUE } = require('../../ApplicationConstants');
+import { PROJECT_SUITEAPP, SDK_TRUE } from '../../ApplicationConstants';
 
-const {
-	COMMAND_DEPLOY: { MESSAGES },
-} = require('../../services/TranslationKeys');
+import { COMMAND_DEPLOY } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { DeployActionResult } from '../actionresult/DeployActionResult';
 
-class DeployOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+export default class DeployOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
-		this._showApplyContentProtectionOptionMessage(
+	public formatActionResult(actionResult: DeployActionResult) {
+		this.showApplyContentProtectionOptionMessage(
 			actionResult.projectType,
-			actionResult.withAppliedContentProtection,
+			actionResult.appliedContentProtection,
 			actionResult.projectFolder
 		);
 
-		if (actionResult.withServerValidation) {
-			this.consoleLogger.info(NodeTranslationService.getMessage(MESSAGES.LOCALLY_VALIDATED, actionResult.projectFolder));
+		if (actionResult.isServerValidation) {
+			this.consoleLogger.info(NodeTranslationService.getMessage(COMMAND_DEPLOY.MESSAGES.LOCALLY_VALIDATED, actionResult.projectFolder));
 		}
 		if (actionResult.resultMessage) {
 			ActionResultUtils.logResultMessage(actionResult, this.consoleLogger);
@@ -36,15 +36,13 @@ class DeployOutputFormatter extends OutputFormatter {
 		}
 	}
 
-	_showApplyContentProtectionOptionMessage(projectType, isApplyContentProtection, projectFolder) {
+	private showApplyContentProtectionOptionMessage(projectType: string, isApplyContentProtection: string, projectFolder: string) {
 		if (projectType === PROJECT_SUITEAPP) {
 			if (isApplyContentProtection === SDK_TRUE) {
-				this.consoleLogger.info(NodeTranslationService.getMessage(MESSAGES.APPLYING_CONTENT_PROTECTION, projectFolder));
+				this.consoleLogger.info(NodeTranslationService.getMessage(COMMAND_DEPLOY.MESSAGES.APPLYING_CONTENT_PROTECTION, projectFolder));
 			} else {
-				this.consoleLogger.info(NodeTranslationService.getMessage(MESSAGES.NOT_APPLYING_CONTENT_PROTECTION, projectFolder));
+				this.consoleLogger.info(NodeTranslationService.getMessage(COMMAND_DEPLOY.MESSAGES.NOT_APPLYING_CONTENT_PROTECTION, projectFolder));
 			}
 		}
 	}
 }
-
-module.exports = DeployOutputFormatter;

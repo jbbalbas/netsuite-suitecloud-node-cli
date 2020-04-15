@@ -3,83 +3,59 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const assert = require('assert');
-const { ActionResult, ActionResultBuilder } = require('./ActionResult');
+import { ActionResult, ActionResultBuilder, STATUS } from './ActionResult';
 
-class ProxyActionResult extends ActionResult {
-	constructor(parameters) {
-		super(parameters);
-		this._isSettingProxy = parameters.isSettingProxy;
-		this._proxyUrl = parameters.proxyUrl;
-		this._isProxyOverridden = parameters.isProxyOverridden;
-	}
-
-	validateParameters(parameters) {
-		assert(parameters);
-		assert(parameters.status, 'status is required when creating an ActionResult object.');
-		if (parameters.status === ActionResult.STATUS.SUCCESS) {
-			if (parameters.isSettingProxy) {
-				assert(parameters.proxyUrl, 'proxyUrl is required when ActionResult is a success.');
-			}
-		}
-		if (parameters.status === ActionResult.STATUS.ERROR) {
-			assert(parameters.errorMessages, 'errorMessages is required when ActionResult is an error.');
-			assert(Array.isArray(parameters.errorMessages), 'errorMessages argument must be an array');
-		}
-	}
-
-	get isSettingProxy() {
-		return this._isSettingProxy;
-	}
-
-	get proxyUrl() {
-		return this._proxyUrl;
-	}
-
-	get isProxyOverridden() {
-		return this._isProxyOverridden;
-	}
-
-	static get Builder() {
-		return new ProxyActionResultBuilder();
-	}
+export interface ProxyActionResult extends ActionResult<null> {
+	isSettingProxy: boolean;
+	proxyUrl: string;
+	isProxyOverridden: boolean;
 }
 
-class ProxyActionResultBuilder extends ActionResultBuilder {
+export class ProxyActionResultBuilder extends ActionResultBuilder<null> {
+
+	isSettingProxy!: boolean;
+	proxyUrl!: string;
+	isProxyOverridden!: boolean;
+
 	constructor() {
 		super();
 	}
 
 	success() {
-		this.status = ActionResult.STATUS.SUCCESS;
+		this.status = STATUS.SUCCESS;
 		return this;
 	}
 
-	withProxySetOption(isSettingProxy) {
+	withProxySetOption(isSettingProxy: boolean) {
 		this.isSettingProxy = isSettingProxy;
 		return this;
 	}
 
-	withProxyUrl(proxyUrl) {
+	withProxyUrl(proxyUrl: string) {
 		this.proxyUrl = proxyUrl;
 		return this;
 	}
 
-	withProxyOverridden(isProxyOverridden) {
+	withProxyOverridden(isProxyOverridden: boolean) {
 		this.isProxyOverridden = isProxyOverridden;
 		return this;
 	}
 
-	build() {
-		return new ProxyActionResult({
+	validate() {
+		super.validate();
+	}
+
+	build(): ProxyActionResult {
+		this.validate();
+		return {
 			status: this.status,
+			data: null,
+			resultMessage: '',
 			isSettingProxy: this.isSettingProxy,
 			isProxyOverridden: this.isProxyOverridden,
-			...(this.errorMessages && { errorMessages: this.errorMessages }),
-			...(this.proxyUrl && { proxyUrl: this.proxyUrl }),
-			...(this.projectFolder && { projectFolder: this.projectFolder }),
-		});
+			errorMessages: this.errorMessages,
+			proxyUrl: this.proxyUrl,
+			projectFolder: this.projectFolder,
+		};
 	}
 }
-
-module.exports = ProxyActionResult;

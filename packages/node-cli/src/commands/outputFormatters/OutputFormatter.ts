@@ -4,22 +4,24 @@
  */
 'use strict';
 
-const { lineBreak } = require('../../loggers/LoggerConstants');
-const { unwrapExceptionMessage, unwrapInformationMessage } = require('../../utils/ExceptionUtils');
+import { lineBreak } from '../../loggers/LoggerConstants';
+import { unwrapExceptionMessage, unwrapInformationMessage } from '../../utils/ExceptionUtils';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { ActionResult } from '../actionresult/ActionResult';
+import CLIException from '../../CLIException';
 
-class OutputFormatter {
-	constructor(consoleLogger) {
-		this._consoleLogger = consoleLogger;
+export default abstract class OutputFormatter {
+
+	protected consoleLogger: ConsoleLogger;
+
+	constructor(consoleLogger: ConsoleLogger) {
+		this.consoleLogger = consoleLogger;
 	}
 
-	get consoleLogger() {
-		return this._consoleLogger;
-	}
+	public abstract formatActionResult(actionResult: ActionResult<any>): void;
 
-	formatActionResult(actionResult) {}
-
-	formatError(error) {
-		const errorMessage = unwrapExceptionMessage(error);
+	public formatError(error: string | CLIException): string {
+		let errorMessage = unwrapExceptionMessage(error);
 		this.consoleLogger.error(errorMessage);
 		const informativeMessage = unwrapInformationMessage(error);
 
@@ -30,5 +32,3 @@ class OutputFormatter {
 		return errorMessage;
 	}
 }
-
-module.exports = OutputFormatter;

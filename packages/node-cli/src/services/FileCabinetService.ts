@@ -4,8 +4,8 @@
  */
 'use strict';
 
-const FileSystemService = require('./FileSystemService');
-const path = require('path');
+import FileSystemService from './FileSystemService';
+import path from 'path';
 
 const SUITESCRIPTS_PATH = '/SuiteScripts';
 const TEMPLATES_PATH = '/Templates';
@@ -22,26 +22,26 @@ const UNRESTRICTED_PATHS = [
 	SUITEAPPS,
 ];
 
-module.exports = class FileCabinetService {
-	constructor(fileCabinetAbsolutePath) {
-		this._fileSystemService = new FileSystemService();
-		this._fileCabinetAbsolutePath = fileCabinetAbsolutePath;
+export default class FileCabinetService {
+
+	private fileSystemService: FileSystemService
+	private fileCabinetAbsolutePath: string;
+
+	constructor(fileCabinetAbsolutePath: string) {
+		this.fileSystemService = new FileSystemService();
+		this.fileCabinetAbsolutePath = fileCabinetAbsolutePath;
 	}
 
-	getFileCabinetRelativePath(file) {
-		return file.replace(this._fileCabinetAbsolutePath, '').replace(/\\/g, '/');
+	public getFileCabinetRelativePath(file: string) {
+		return file.replace(this.fileCabinetAbsolutePath, '').replace(/\\/g, '/');
 	}
 
-	getFileCabinetFolders() {
-		return this._getFileCabinetFolders(this._fileCabinetAbsolutePath);
-	}
-
-	_getFileCabinetFolders(parentFolder) {
-		const folders = [];
-		const getFoldersRecursively = source =>
-			this._fileSystemService.getFoldersFromDirectory(source).forEach(folder => {
+	public getFileCabinetFolders(parentFolder: string = this.fileCabinetAbsolutePath) {
+		const folders: string[] = [];
+		const getFoldersRecursively = (source: string) =>
+			this.fileSystemService.getFoldersFromDirectory(source).forEach(folder => {
 				folders.push(folder);
-				if (this._shouldEnterFolder(folder)) {
+				if (this.shouldEnterFolder(folder)) {
 					getFoldersRecursively(folder);
 				}
 			});
@@ -50,16 +50,16 @@ module.exports = class FileCabinetService {
 		return folders;
 	}
 
-	isUnrestrictedPath(path) {
+	public isUnrestrictedPath(path: string) {
 		return UNRESTRICTED_PATHS.some(unrestrictedPath => path.startsWith(unrestrictedPath));
 	}
 
-	_shouldEnterFolder(folder) {
+	private shouldEnterFolder(folder: string) {
 		//Templates itself is restricted, but it has both restricted and unrestricted child folders, so we still need to get inside it.
-		return this._isTemplatesFolder(folder) || (this.isUnrestrictedPath(folder) && this._fileSystemService.getFilesFromDirectory(folder).length);
+		return this.isTemplatesFolder(folder) || (this.isUnrestrictedPath(folder) && this.fileSystemService.getFilesFromDirectory(folder).length);
 	}
 
-	_isTemplatesFolder(folder) {
-		return folder === path.join(this._fileCabinetAbsolutePath, TEMPLATES_PATH);
+	private isTemplatesFolder(folder: string) {
+		return folder === path.join(this.fileCabinetAbsolutePath, TEMPLATES_PATH);
 	}
 };

@@ -3,43 +3,73 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
-const ActionResultUtils = require('../../utils/ActionResultUtils');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
+import * as ActionResultUtils from '../../utils/ActionResultUtils';
 
-const {
-	COMMAND_IMPORTOBJECTS: { OUTPUT },
-} = require('../../services/TranslationKeys');
+import { COMMAND_IMPORTOBJECTS } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { ActionResult } from '../actionresult/ActionResult';
 
-class ImportObjectsOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+type ImportObjectsData = {
+	successfulImports: {
+		customObject: {
+			id: string;
+			type: string
+		},
+		referencedFileImportResult: ReferencedFileImportResult;
+	}[],
+	failedImports: {
+		customObject: {
+			type: string;
+			id: string;
+			result: {
+				message: string
+			}
+		}
+	}[];
+}
+
+type ReferencedFileImportResult = {
+	successfulImports: {
+		path: string;
+		message: string
+	}[],
+	failedImports: {
+		path: string;
+		message: string
+	}[]
+}
+
+export default class ImportObjectsOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
+	public formatActionResult(actionResult: ActionResult<ImportObjectsData>) {
 		if (!actionResult.data) {
 			ActionResultUtils.logResultMessage(actionResult, this.consoleLogger);
 			return;
 		}
 
-		this._logImportedObjects(actionResult.data.successfulImports);
-		this._logUnImportedObjects(actionResult.data.failedImports);
+		this.logImportedObjects(actionResult.data.successfulImports);
+		this.logUnImportedObjects(actionResult.data.failedImports);
 	}
 
-	_logImportedObjects(importedObjects) {
+	private logImportedObjects(importedObjects: ImportObjectsData["successfulImports"]) {
 		if (Array.isArray(importedObjects) && importedObjects.length) {
-			this.consoleLogger.result(NodeTranslationService.getMessage(OUTPUT.IMPORTED_OBJECTS));
+			this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_IMPORTOBJECTS.OUTPUT.IMPORTED_OBJECTS));
 			importedObjects.forEach(objectImport => {
 				const importedObjectLogMessage = `${this.consoleLogger.getPadding(1)}- ${objectImport.customObject.type}:${
 					objectImport.customObject.id
 				}`;
 				this.consoleLogger.result(importedObjectLogMessage);
-				this._logReferencedFileImportResult(objectImport.referencedFileImportResult);
+				this.logReferencedFileImportResult(objectImport.referencedFileImportResult);
 			});
 		}
 	}
 
-	_logReferencedFileImportResult(referencedFileImportResult) {
+	private logReferencedFileImportResult(referencedFileImportResult: ReferencedFileImportResult) {
 		const importedFiles = referencedFileImportResult.successfulImports;
 		const unImportedFiles = referencedFileImportResult.failedImports;
 
@@ -47,7 +77,7 @@ class ImportObjectsOutputFormatter extends OutputFormatter {
 			(Array.isArray(importedFiles) && importedFiles.length) || (Array.isArray(unImportedFiles) && unImportedFiles.length);
 		if (thereAreReferencedFiles) {
 			const referencedFilesLogMessage = `${this.consoleLogger.getPadding(2)}- ${NodeTranslationService.getMessage(
-				OUTPUT.REFERENCED_SUITESCRIPT_FILES
+				COMMAND_IMPORTOBJECTS.OUTPUT.REFERENCED_SUITESCRIPT_FILES
 			)}`;
 			this.consoleLogger.result(referencedFilesLogMessage);
 		}
@@ -55,7 +85,7 @@ class ImportObjectsOutputFormatter extends OutputFormatter {
 		if (Array.isArray(importedFiles) && importedFiles.length) {
 			importedFiles.forEach(importedFile => {
 				const importedFileLogMessage = `${this.consoleLogger.getPadding(3)}- ${NodeTranslationService.getMessage(
-					OUTPUT.REFERENCED_SUITESCRIPT_FILE_IMPORTED,
+					COMMAND_IMPORTOBJECTS.OUTPUT.REFERENCED_SUITESCRIPT_FILE_IMPORTED,
 					importedFile.path
 				)}`;
 				this.consoleLogger.result(importedFileLogMessage);
@@ -65,7 +95,7 @@ class ImportObjectsOutputFormatter extends OutputFormatter {
 		if (Array.isArray(unImportedFiles) && unImportedFiles.length) {
 			unImportedFiles.forEach(unImportedFile => {
 				const unimportedFileLogMessage = `${this.consoleLogger.getPadding(3)}- ${NodeTranslationService.getMessage(
-					OUTPUT.REFERENCED_SUITESCRIPT_FILE_IMPORT_FAILED,
+					COMMAND_IMPORTOBJECTS.OUTPUT.REFERENCED_SUITESCRIPT_FILE_IMPORT_FAILED,
 					unImportedFile.path,
 					unImportedFile.message
 				)}`;
@@ -74,12 +104,12 @@ class ImportObjectsOutputFormatter extends OutputFormatter {
 		}
 	}
 
-	_logUnImportedObjects(unImportedObjects) {
+	private logUnImportedObjects(unImportedObjects: ImportObjectsData["failedImports"]) {
 		if (Array.isArray(unImportedObjects) && unImportedObjects.length) {
-			this.consoleLogger.warning(NodeTranslationService.getMessage(OUTPUT.UNIMPORTED_OBJECTS));
+			this.consoleLogger.warning(NodeTranslationService.getMessage(COMMAND_IMPORTOBJECTS.OUTPUT.UNIMPORTED_OBJECTS));
 			unImportedObjects.forEach(objectImport => {
 				const unimportedObjectLogMessage = `${this.consoleLogger.getPadding(1)}- ${NodeTranslationService.getMessage(
-					OUTPUT.OBJECT_IMPORT_FAILED,
+					COMMAND_IMPORTOBJECTS.OUTPUT.OBJECT_IMPORT_FAILED,
 					objectImport.customObject.type,
 					objectImport.customObject.id,
 					objectImport.customObject.result.message
@@ -89,5 +119,3 @@ class ImportObjectsOutputFormatter extends OutputFormatter {
 		}
 	}
 }
-
-module.exports = ImportObjectsOutputFormatter;

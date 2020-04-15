@@ -3,36 +3,40 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 
-const {
-	COMMAND_UPDATE: { OUTPUT },
-} = require('../../services/TranslationKeys');
+import { COMMAND_UPDATE } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { ActionResult } from '../actionresult/ActionResult';
 
 const UPDATED_OBJECT_TYPE = {
 	SUCCESS: 'SUCCESS',
 };
 
-class UpdateOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+type UpdateData = {
+	type: string;
+	key: string;
+	message: string;
+}[];
+
+export default class UpdateOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
+	public formatActionResult(actionResult: ActionResult<UpdateData>) {
 		const updatedObjects = actionResult.data.filter(element => element.type === UPDATED_OBJECT_TYPE.SUCCESS);
 		const noUpdatedObjects = actionResult.data.filter(element => element.type !== UPDATED_OBJECT_TYPE.SUCCESS);
-		const sortByKey = (a, b) => (a.key > b.key ? 1 : -1);
+		const sortByKey = (a: {key: string}, b: {key: string}) => (a.key > b.key ? 1 : -1);
 
 		if (updatedObjects.length > 0) {
-			this.consoleLogger.result(NodeTranslationService.getMessage(OUTPUT.UPDATED_OBJECTS));
+			this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_UPDATE.OUTPUT.UPDATED_OBJECTS));
 			updatedObjects.sort(sortByKey).forEach(updatedObject => this.consoleLogger.result(updatedObject.key));
 		}
 		if (noUpdatedObjects.length > 0) {
-			this.consoleLogger.warning(NodeTranslationService.getMessage(OUTPUT.NO_UPDATED_OBJECTS));
+			this.consoleLogger.warning(NodeTranslationService.getMessage(COMMAND_UPDATE.OUTPUT.NO_UPDATED_OBJECTS));
 			noUpdatedObjects.sort(sortByKey).forEach(noUpdatedObject => this.consoleLogger.warning(noUpdatedObject.message));
 		}
 	}
 }
-
-module.exports = UpdateOutputFormatter;

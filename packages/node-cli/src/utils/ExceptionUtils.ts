@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import CLIException from '../CLIException';
 import { COMMAND_OPTIONS_VALIDATION_ERRORS_INTERACTIVE_SUGGESTION } from '../services/TranslationKeys';
 import { formatErrors } from '../utils/ValidationErrorsFormatter';

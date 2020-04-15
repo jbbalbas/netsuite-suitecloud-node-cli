@@ -4,10 +4,8 @@
  */
 'use strict';
 
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { ANSWERS_VALIDATION_MESSAGES, COMMAND_OPTION_IS_MANDATORY } from '../services/TranslationKeys';
-import url from 'url';
-
 import * as ApplicationConstants from '../ApplicationConstants';
 
 const VALIDATION_RESULT_FAILURE = (validationError: string) => ({
@@ -15,8 +13,6 @@ const VALIDATION_RESULT_FAILURE = (validationError: string) => ({
 	validationMessage: validationError,
 });
 const VALIDATION_RESULT_SUCCESS = { result: true };
-
-const { ANSWERS_VALIDATION_MESSAGES, COMMAND_OPTION_IS_MANDATORY } = require('../services/TranslationKeys');
 
 const ALPHANUMERIC_LOWERCASE_REGEX = '[a-z0-9]+';
 const ALPHANUMERIC_LOWERCASE_WHOLE_REGEX = `^${ALPHANUMERIC_LOWERCASE_REGEX}$`;
@@ -45,6 +41,12 @@ export function validateFieldIsNotEmpty(fieldValue: string) {
 	return fieldValue !== ''
 		? VALIDATION_RESULT_SUCCESS
 		: VALIDATION_RESULT_FAILURE(NodeTranslationService.getMessage(ANSWERS_VALIDATION_MESSAGES.EMPTY_FIELD));
+}
+
+export function validateFolder(fieldValue: string) {
+	return !INVALID_CHARACTERS_IN_PATH.test(fieldValue)
+		? VALIDATION_RESULT_SUCCESS
+		: VALIDATION_RESULT_FAILURE(NodeTranslationService.getMessage(ANSWERS_VALIDATION_MESSAGES.FOLDER_HAS_INVALID_CHARACTERS));
 }
 
 export function validateFieldHasNoSpaces(fieldValue: string) {
@@ -99,8 +101,8 @@ export function validateScriptId(fieldValue: string) {
 
 	if (notEmpty.result !== true) {
 		return notEmpty;
-	} else if (!fieldValue.match(SUITEAPP_ID_FORMAT_REGEX)) {
-		return VALIDATION_RESULT_FAILURE(NodeTranslationService.getMessage(ANSWERS_VALIDATION_MESSAGES.APP_ID_FORMAT));
+	} else if (!fieldValue.match(SCRIPT_ID_REGEX)) {
+		return VALIDATION_RESULT_FAILURE(NodeTranslationService.getMessage(ANSWERS_VALIDATION_MESSAGES.SCRIPT_ID_FORMAT));
 	}
 	return VALIDATION_RESULT_SUCCESS;
 }
@@ -114,7 +116,7 @@ export function validateXMLCharacters(fieldValue: string) {
 export function validateNotUndefined(value: string, optionName: string) {
 	return value !== undefined
 		? VALIDATION_RESULT_SUCCESS
-		: VALIDATION_RESULT_FAILURE(TranslationService.getMessage(COMMAND_OPTION_IS_MANDATORY, optionName));
+		: VALIDATION_RESULT_FAILURE(NodeTranslationService.getMessage(COMMAND_OPTION_IS_MANDATORY, optionName));
 }
 
 export 	function validateProjectType(value: string) {

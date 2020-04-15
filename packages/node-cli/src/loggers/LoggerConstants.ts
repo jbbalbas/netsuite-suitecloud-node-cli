@@ -4,17 +4,15 @@
  */
 'use strict';
 
-const chalk = require('chalk');
-const os = require('os');
+import chalk from 'chalk';
+import { EOL } from 'os';
 
-module.exports = {
-	COLORS: {
-		DEFAULT: chalk.white,
-		RESULT: chalk.green,
-		ERROR: chalk.red,
-		INFO: chalk.cyan,
-		WARNING: chalk.yellow,
-	},
-	padding: '\u0020\u0020\u0020\u0020', //4 spaces
-	lineBreak: os.EOL,
+export const COLORS = {
+	DEFAULT: chalk.white,
+	RESULT: chalk.green,
+	ERROR: chalk.red,
+	INFO: chalk.cyan,
+	WARNING: chalk.yellow,
 };
+export const padding = '\u0020\u0020\u0020\u0020'; //4 spaces
+export const lineBreak = EOL;

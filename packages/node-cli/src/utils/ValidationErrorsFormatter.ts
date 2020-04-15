@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import * as TRANSLATION_KEYS from '../services/TranslationKeys';
 import { lineBreak } from '../loggers/LoggerConstants';
 import assert from 'assert';
@@ -17,5 +17,5 @@ export function formatErrors(validationErrors: (string | boolean | undefined)[])
 		TRANSLATION_KEYS.COMMAND_OPTIONS_VALIDATION_ERRORS
 	);
 	const validationErrorsString = validationErrors.join(lineBreak);
-	return `${errorMessageHeader}${NodeUtils.lineBreak}${validationErrorsString}`;
+	return `${errorMessageHeader}${lineBreak}${validationErrorsString}`;
 }

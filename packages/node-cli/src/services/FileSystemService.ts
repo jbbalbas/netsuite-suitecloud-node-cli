@@ -8,8 +8,8 @@ import { lstatSync, readdirSync, readFile, writeFile, mkdirSync, renameSync, exi
 import assert from 'assert';
 import path from 'path';
 import CLIException from '../CLIException';
-import TranslationService from '../services/TranslationService';
-import { ERRORS } from '../services/TranslationKeys');
+import { NodeTranslationService } from '../services/NodeTranslationService';
+import { ERRORS } from '../services/TranslationKeys';
 
 const CHAR_ENCODING_UTF8 = 'utf-8';
 
@@ -29,8 +29,8 @@ export default class FileSystemService {
 
 	public getFoldersFromDirectoryRecursively(parentFolder: string) {
 		assert(parentFolder);
-		const folders = [];
-		const getFoldersRecursively = source =>
+		const folders: string[] = [];
+		const getFoldersRecursively = (source: string) =>
 				this.getFoldersFromDirectory(source).forEach(folder => {
 				folders.push(folder);
 				getFoldersRecursively(folder);
@@ -86,12 +86,6 @@ export default class FileSystemService {
 				});
 			});
 		});
-		try {
-			if (!existsSync(targetFolder)) {
-				mkdirSync(path.join(targetFolder));
-			}
-		} catch (e) {
-			throw new CLIException(e.errno,TranslationService.getMessage(ERRORS.CANT_CREATE_FOLDER, e.path, e.code));
 	}
 	
 	public createFolder(parentFolderPath: string, folderName: string) {
@@ -100,8 +94,12 @@ export default class FileSystemService {
 	
 		let targetFolder = path.join(parentFolderPath, folderName);
 	
-		if (!existsSync(targetFolder)) {
-			mkdirSync(path.join(targetFolder));
+		try {
+			if (!existsSync(targetFolder)) {
+				mkdirSync(path.join(targetFolder));
+			}
+		} catch (e) {
+			throw new CLIException(e.errno, NodeTranslationService.getMessage(ERRORS.CANT_CREATE_FOLDER, e.path, e.code));
 		}
 	
 		return targetFolder;
@@ -142,7 +140,7 @@ export default class FileSystemService {
 				if (lstatSync(currentPath).isDirectory()) {
 					this.deleteFolderRecursive(currentPath);
 				} else {
-					this.unlinkSync(currentPath);
+					unlinkSync(currentPath);
 				}
 			});
 		}

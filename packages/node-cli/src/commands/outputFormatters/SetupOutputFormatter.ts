@@ -3,12 +3,12 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 
-const {
-	COMMAND_SETUPACCOUNT: { OUTPUT },
-} = require('../../services/TranslationKeys');
+import { COMMAND_SETUPACCOUNT } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { SetupActionResult } from '../actionresult/SetupActionResult';
 
 const AUTH_MODE = {
 	OAUTH: 'OAUTH',
@@ -16,17 +16,17 @@ const AUTH_MODE = {
 	REUSE: 'REUSE',
 };
 
-class SetupOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+export default class SetupOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
-		let resultMessage;
+	public formatActionResult(actionResult: SetupActionResult) {
+		let resultMessage = '';
 		switch (actionResult.mode) {
 			case AUTH_MODE.OAUTH:
 				resultMessage = NodeTranslationService.getMessage(
-					OUTPUT.NEW_OAUTH,
+					COMMAND_SETUPACCOUNT.OUTPUT.NEW_OAUTH,
 					actionResult.accountInfo.companyName,
 					actionResult.accountInfo.roleName,
 					actionResult.authId
@@ -34,7 +34,7 @@ class SetupOutputFormatter extends OutputFormatter {
 				break;
 			case AUTH_MODE.SAVE_TOKEN:
 				resultMessage = NodeTranslationService.getMessage(
-					OUTPUT.NEW_SAVED_TOKEN,
+					COMMAND_SETUPACCOUNT.OUTPUT.NEW_SAVED_TOKEN,
 					actionResult.accountInfo.companyName,
 					actionResult.accountInfo.roleName,
 					actionResult.authId
@@ -42,7 +42,7 @@ class SetupOutputFormatter extends OutputFormatter {
 				break;
 			case AUTH_MODE.REUSE:
 				resultMessage = NodeTranslationService.getMessage(
-					OUTPUT.REUSED_AUTH_ID,
+					COMMAND_SETUPACCOUNT.OUTPUT.REUSED_AUTH_ID,
 					actionResult.authId,
 					actionResult.accountInfo.companyName,
 					actionResult.accountInfo.roleName
@@ -53,8 +53,6 @@ class SetupOutputFormatter extends OutputFormatter {
 		}
 
 		this.consoleLogger.result(resultMessage);
-		this.consoleLogger.result(NodeTranslationService.getMessage(OUTPUT.SUCCESSFUL));
+		this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_SETUPACCOUNT.OUTPUT.SUCCESSFUL));
 	}
 }
-
-module.exports = SetupOutputFormatter;

@@ -3,36 +3,34 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 
-const ActionResultUtils = require('../../utils/ActionResultUtils');
-const {
-	COMMAND_CREATEPROJECT: { MESSAGES },
-} = require('../../services/TranslationKeys');
+import * as ActionResultUtils from '../../utils/ActionResultUtils';
+import { COMMAND_CREATEPROJECT } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { CreateProjectActionResult } from '../actionresult/CreateProjectActionResult';
 
-class CreateProjectOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+export default class CreateProjectOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
+	formatActionResult(actionResult: CreateProjectActionResult) {
 		ActionResultUtils.logResultMessage(actionResult, this.consoleLogger);
 
-		const projectCreatedMessage = NodeTranslationService.getMessage(MESSAGES.PROJECT_CREATED, actionResult.projectName);
+		const projectCreatedMessage = NodeTranslationService.getMessage(COMMAND_CREATEPROJECT.MESSAGES.PROJECT_CREATED, actionResult.projectName);
 		this.consoleLogger.result(projectCreatedMessage);
 
 		if (actionResult.includeUnitTesting) {
-			const sampleUnitTestMessage = NodeTranslationService.getMessage(MESSAGES.SAMPLE_UNIT_TEST_ADDED);
+			const sampleUnitTestMessage = NodeTranslationService.getMessage(COMMAND_CREATEPROJECT.MESSAGES.SAMPLE_UNIT_TEST_ADDED);
 			this.consoleLogger.result(sampleUnitTestMessage);
-			if (!actionResult.npmPackageIntitialized) {
-				this.consoleLogger.error(NodeTranslationService.getMessage(MESSAGES.INIT_NPM_DEPENDENCIES_FAILED));
+			if (!actionResult.npmInstallSuccess) {
+				this.consoleLogger.error(NodeTranslationService.getMessage(COMMAND_CREATEPROJECT.MESSAGES.INIT_NPM_DEPENDENCIES_FAILED));
 			}
 		}
 
-		const navigateToProjectMessage = NodeTranslationService.getMessage(MESSAGES.NAVIGATE_TO_FOLDER, actionResult.projectDirectory);
+		const navigateToProjectMessage = NodeTranslationService.getMessage(COMMAND_CREATEPROJECT.MESSAGES.NAVIGATE_TO_FOLDER, actionResult.projectDirectory);
 		this.consoleLogger.result(navigateToProjectMessage);
 	}
 }
-
-module.exports = CreateProjectOutputFormatter;

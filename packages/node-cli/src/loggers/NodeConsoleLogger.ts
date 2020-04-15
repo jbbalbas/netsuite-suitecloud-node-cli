@@ -4,36 +4,38 @@
  */
 'use strict';
 
-const chalk = require('chalk');
-const ConsoleLogger = require('./ConsoleLogger');
-const { COLORS } = require('./LoggerConstants');
+import chalk, { Chalk } from 'chalk';
+import ConsoleLogger from './ConsoleLogger';
+import { COLORS } from './LoggerConstants';
 
 class NodeConsoleLogger extends ConsoleLogger {
-	println(message, color) {
-		console.log(this._formatString(message, { color: color }));
+	public println(message: string, color: Chalk) {
+		console.log(this.formatString(message, { color: color }));
 	}
 
-	info(message) {
+	public info(message: string) {
 		this.println(message, COLORS.INFO);
 	}
 
-	result(message) {
+	public result(message: string) {
 		this.println(message, COLORS.RESULT);
 	}
 
-	warning(message) {
+	public warning(message: string) {
 		this.println(message, COLORS.WARNING);
 	}
 
-	error(message) {
+	public error(message: string) {
 		this.println(message, COLORS.ERROR);
 	}
 
-	_formatString(str, options) {
+	private formatString(str: string, options: {color?: Chalk; bold?: (str: string) => string}): string {
 		const color = options.color || COLORS.DEFAULT;
-		const bold = options.bold ? chalk.bold : str => str;
+		const bold = options.bold ? chalk.bold : (str: string) => str;
 		return bold(color(str));
 	}
 }
 
-module.exports = new NodeConsoleLogger();
+const instance = new NodeConsoleLogger();
+
+export { instance as NodeConsoleLogger };

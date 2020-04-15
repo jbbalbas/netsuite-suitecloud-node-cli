@@ -5,7 +5,7 @@
 
 'use strict';
 
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import assert from 'assert';
 import { LINKS, PROJECT_ACP, PROJECT_SUITEAPP, SDK_FALSE, SDK_TRUE } from '../ApplicationConstants';
 import ProjectInfoService from '../services/ProjectInfoService';

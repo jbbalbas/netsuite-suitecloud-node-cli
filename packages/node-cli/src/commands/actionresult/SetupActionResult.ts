@@ -3,83 +3,75 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const assert = require('assert');
-const { ActionResult, ActionResultBuilder } = require('./ActionResult');
+import assert from 'assert';
+import { ActionResult, ActionResultBuilder, STATUS } from './ActionResult';
 
-class SetupCommandActionResult extends ActionResult {
-	constructor(parameters) {
-		super(parameters);
-		this._mode = parameters.mode;
-		this._authId = parameters.authId;
-		this._accountInfo = parameters.accountInfo;
-	}
+export interface SetupActionResult extends ActionResult<null> {
 
-	validateParameters(parameters) {
-		assert(parameters);
-		assert(parameters.status, 'status is required when creating an ActionResult object.');
-		if (parameters.status === ActionResult.STATUS.SUCCESS) {
-			assert(parameters.mode, 'mode is required when ActionResult is a success.');
-			assert(parameters.authId, 'authId is required when ActionResult is a success.');
-			assert(parameters.accountInfo, 'accountInfo is required when ActionResult is a success.');
-		}
-		if (parameters.status === ActionResult.STATUS.ERROR) {
-			assert(parameters.errorMessages, 'errorMessages is required when ActionResult is an error.');
-			assert(Array.isArray(parameters.errorMessages), 'errorMessages argument must be an array');
-		}
-	}
-
-	get mode() {
-		return this._mode;
-	}
-
-	get authId() {
-		return this._authId;
-	}
-
-	get accountInfo() {
-		return this._accountInfo;
-	}
-
-	static get Builder() {
-		return new SetupActionResultBuilder();
-	}
+	mode: string;
+	authId: string;
+	accountInfo: {
+		companyName: string;
+		roleName: string;
+	};
 }
 
-class SetupActionResultBuilder extends ActionResultBuilder {
+export class SetupActionResultBuilder extends ActionResultBuilder<null> {
+
+	mode!: string;
+	authId!: string;
+	accountInfo!: {
+		companyName: string;
+		roleName: string;
+	};
+
 	constructor() {
 		super();
 	}
 
 	success() {
-		this.status = ActionResult.STATUS.SUCCESS;
+		this.status = STATUS.SUCCESS;
 		return this;
 	}
 
-	withMode(mode) {
+	withMode(mode: string) {
 		this.mode = mode;
 		return this;
 	}
 
-	withAuthId(authId) {
+	withAuthId(authId: string) {
 		this.authId = authId;
 		return this;
 	}
 
-	withAccountInfo(accountInfo) {
+	withAccountInfo(accountInfo: {companyName: string; roleName: string;}) {
 		this.accountInfo = accountInfo;
 		return this;
 	}
 
-	build() {
-		return new SetupCommandActionResult({
+	validate() {
+		super.validate();
+		if (this.status === STATUS.SUCCESS) {
+			assert(this.mode, 'mode is required when ActionResult is a success.');
+			assert(this.authId, 'authId is required when ActionResult is a success.');
+			assert(this.accountInfo, 'accountInfo is required when ActionResult is a success.');
+		}
+		if (this.status === STATUS.ERROR) {
+			assert(this.errorMessages, 'errorMessages is required when ActionResult is an error.');
+			assert(Array.isArray(this.errorMessages), 'errorMessages argument must be an array');
+		}
+	}
+
+	build(): SetupActionResult {
+		return {
 			status: this.status,
-			...(this.errorMessages && { errorMessages: this.errorMessages }),
-			...(this.mode && { mode: this.mode }),
-			...(this.authId && { authId: this.authId }),
-			...(this.accountInfo && { accountInfo: this.accountInfo }),
-			...(this.projectFolder && { projectFolder: this.projectFolder }),
-		});
+			data: null,
+			resultMessage: '',
+			errorMessages: this.errorMessages,
+			mode: this.mode,
+			authId: this.authId,
+			accountInfo: this.accountInfo,
+			projectFolder: this.projectFolder,
+		};
 	}
 }
-
-module.exports = SetupCommandActionResult;

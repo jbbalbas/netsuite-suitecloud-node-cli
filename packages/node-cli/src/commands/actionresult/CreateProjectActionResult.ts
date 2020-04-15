@@ -3,96 +3,83 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const assert = require('assert');
-const { ActionResult, ActionResultBuilder } = require('./ActionResult');
+import assert from 'assert';
+import { ActionResult, ActionResultBuilder, STATUS } from './ActionResult';
 
-class CreateProjectActionResult extends ActionResult {
-	constructor(parameters) {
-		super(parameters);
-		this._projectType = parameters.projectType;
-		this._projectName = parameters.projectName;
-		this._projectDirectory = parameters.projectDirectory;
-		this._includeUnitTesting = parameters.includeUnitTesting;
-		this._npmPackageInitialized = parameters.npmPackageIntitialized;
-	}
-
-	validateParameters(parameters) {
-		super.validateParameters(parameters);
-		if (parameters.status === ActionResult.STATUS.SUCCESS) {
-			assert(parameters.projectDirectory, 'projectDirectory is required when ActionResult is a success.');
-			assert(parameters.projectType, 'projectType is required when ActionResult is a success.');
-		}
-	}
-
-	get projectType() {
-		return this._projectType;
-	}
-
-	get projectName() {
-		return this._projectName;
-	}
-
-	get projectDirectory() {
-		return this._projectDirectory;
-	}
-
-	get includeUnitTesting() {
-		return this._includeUnitTesting;
-	}
-
-	get npmPackageInitialized() {
-		return this._npmPackageInitialized;
-	}
-
-	static get Builder() {
-		return new CreateProjectActionResultBuilder();
-	}
+type CreateProjectData = {
+	projectType: string;
+	projectDirectory: string;
+	includeUnitTesting: boolean;
+	npmInstallSuccess: boolean;
 }
 
-class CreateProjectActionResultBuilder extends ActionResultBuilder {
+export interface CreateProjectActionResult extends ActionResult<CreateProjectData> {
+
+	projectType: string;
+	projectName: string;
+	projectDirectory: string;
+	includeUnitTesting: boolean;
+	npmInstallSuccess: boolean;
+}
+
+export class CreateProjectActionResultBuilder extends ActionResultBuilder<CreateProjectData> {
+
+	projectType!: string;
+	projectName!: string;
+	projectDirectory!: string;
+	includeUnitTesting!: boolean;
+	npmPackageInitialized!: boolean;
+
 	constructor() {
 		super();
 	}
 
-	withProjectType(projectType) {
+	withProjectType(projectType: string) {
 		this.projectType = projectType;
 		return this;
 	}
 
-	withProjectName(projectName) {
+	withProjectName(projectName: string) {
 		this.projectName = projectName;
 		return this;
 	}
 
-	withProjectDirectory(projectDirectory) {
+	withProjectDirectory(projectDirectory: string) {
 		this.projectDirectory = projectDirectory;
 		return this;
 	}
 
-	withUnitTesting(includeUnitTesting) {
+	withUnitTesting(includeUnitTesting: boolean) {
 		this.includeUnitTesting = includeUnitTesting;
 		return this;
 	}
 
-	withNpmPackageInitialized(npmPackageInitialized) {
-		this.npmPackageIntitialized = npmPackageInitialized;
+	withNpmPackageInitialized(npmPackageInitialized: boolean) {
+		this.npmPackageInitialized = npmPackageInitialized;
 		return this;
 	}
 
-	build() {
-		return new CreateProjectActionResult({
+	validate() {
+		super.validate();
+		if (this.status === STATUS.SUCCESS) {
+			assert(this.projectDirectory, 'projectDirectory is required when ActionResult is a success.');
+			assert(this.projectType, 'projectType is required when ActionResult is a success.');
+		}
+	}
+
+	build(): CreateProjectActionResult {
+		this.validate();
+		return {
 			status: this.status,
-			...(this.data && { data: this.data }),
-			...(this.resultMessage && { resultMessage: this.resultMessage }),
-			...(this.errorMessages && { errorMessages: this.errorMessages }),
-			...(this.projectType && { projectType: this.projectType }),
-			...(this.projectName && { projectName: this.projectName }),
-			...(this.projectDirectory && { projectDirectory: this.projectDirectory }),
-			...(this.includeUnitTesting && { includeUnitTesting: this.includeUnitTesting }),
-			...(this.npmPackageIntitialized && { npmInstallSuccess: this.npmPackageIntitialized }),
-			...(this.projectFolder && { projectFolder: this.projectFolder }),
-		});
+			data: this.data,
+			resultMessage: this.resultMessage,
+			errorMessages: this.errorMessages,
+			projectType: this.projectType,
+			projectName: this.projectName,
+			projectDirectory: this.projectDirectory,
+			includeUnitTesting: this.includeUnitTesting,
+			npmInstallSuccess: this.npmPackageInitialized,
+			projectFolder: this.projectFolder,
+		};
 	}
 }
-
-module.exports = CreateProjectActionResult;

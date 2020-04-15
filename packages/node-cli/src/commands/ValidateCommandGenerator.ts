@@ -5,13 +5,13 @@
 
 'use strict';
 import { ActionResult } from '../commands/actionresult/ActionResult';
-import DeployActionResult from '../commands/actionresult/DeployActionResult';
-import ActionResultUtils from '../utils/ActionResultUtils';
+import { ValidateActionResultBuilder } from '../commands/actionresult/ValidateActionResult';
+import * as ActionResultUtils from '../utils/ActionResultUtils';
 
 import BaseCommandGenerator from './BaseCommandGenerator';
 import SDKExecutionContext from '../SDKExecutionContext';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import * as CommandUtils from '../utils/CommandUtils';
 import ProjectInfoService from '../services/ProjectInfoService';
 import AccountSpecificArgumentHandler from '../utils/AccountSpecificValuesArgumentHandler';
@@ -25,7 +25,6 @@ import { ValidateCommandAnswers } from '../../types/CommandAnswers';
 import { ValidateOperationResult, ValidateOperationSdkParams } from '../../types/OperationResult';
 import { ColorSupport, Chalk } from 'chalk';
 import ValidateOutputFormatter from './outputFormatters/ValidateOutputFormatter';
-
 
 const COMMAND_OPTIONS = {
 	SERVER: 'server',
@@ -43,6 +42,7 @@ export default class ValidateCommandGenerator extends BaseCommandGenerator<BaseC
 	private projectInfoService: ProjectInfoService;
 	private accountSpecificValuesArgumentHandler: AccountSpecificArgumentHandler;
 	private applyContentProtectionArgumentHandler: ApplyContentProtectinoArgumentHandler;
+	private responseBuilder = new ValidateActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -54,7 +54,7 @@ export default class ValidateCommandGenerator extends BaseCommandGenerator<BaseC
 			projectInfoService: this.projectInfoService,
 			commandName: this.commandMetadata.sdkCommand,
 		});
-		this._outputFormatter = new ValidateOutputFormatter(this.consoleLogger);
+		this.outputFormatter = new ValidateOutputFormatter(this.consoleLogger);
 	}
 
 	public getCommandQuestions(prompt: Prompt<ValidateCommandAnswers>) {
@@ -160,16 +160,16 @@ export default class ValidateCommandGenerator extends BaseCommandGenerator<BaseC
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? DeployActionResult.Builder.withData(operationResult.data)
+				? this.responseBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
 						.withServerValidation(isServerValidation)
 						.withAppliedContentProtection(SDKParams[COMMAND_OPTIONS.APPLY_CONTENT_PROTECTION] === SDK_TRUE)
-						.withProjectType(this.projectInfoService.getProjectType)
+						.withProjectType(this.projectInfoService.getProjectType())
 						.withProjectFolder(this.projectFolder)
 						.build()
-				: DeployActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.responseBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return DeployActionResult.Builder.withErrors([error]).build();
+			return this.responseBuilder.withErrors([error]).build();
 		}
 	}
 };

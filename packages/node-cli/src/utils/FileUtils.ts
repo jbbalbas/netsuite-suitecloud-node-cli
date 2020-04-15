@@ -5,8 +5,6 @@
 'use strict';
 
 import fs from 'fs';
-import NodeTranslationService from '../services/NodeTranslationService';
-import { ERRORS } from '../services/TranslationKeys';
 const UTF8 = 'utf8';
 
 export function create(fileName: string, object: any) {

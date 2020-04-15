@@ -3,12 +3,12 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-const OutputFormatter = require('./OutputFormatter');
-const NodeTranslationService = require('../../services/NodeTranslationService');
+import OutputFormatter from './OutputFormatter';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 
-const {
-	COMMAND_ADDDEPENDENCIES: { MESSAGES },
-} = require('../../services/TranslationKeys');
+import { COMMAND_ADDDEPENDENCIES } from '../../services/TranslationKeys';
+import ConsoleLogger from '../../loggers/ConsoleLogger';
+import { ActionResult } from '../actionresult/ActionResult';
 
 const DEPENDENCY_TYPES = {
 	FEATURE: {
@@ -48,48 +48,58 @@ const OBJECT_CONTAINER_PREFIX = {
 	SUITEAPP: 'Application',
 };
 
-class AddDependenciesOutputFormatter extends OutputFormatter {
-	constructor(consoleLogger) {
+type AddDependenciesData = {
+	type: string;
+	required: boolean;
+	value: string;
+	appId?: string;
+	bundleIds?: string;
+	scriptId?: string;
+	objectType?: string;
+}[];
+
+export default class AddDependenciesOutputFormatter extends OutputFormatter {
+	constructor(consoleLogger: ConsoleLogger) {
 		super(consoleLogger);
 	}
 
-	formatActionResult(actionResult) {
+	public formatActionResult(actionResult: ActionResult<AddDependenciesData>) {
 		if (actionResult.data.length === 0) {
-			this.consoleLogger.result(NodeTranslationService.getMessage(MESSAGES.NO_UNRESOLVED_DEPENDENCIES));
+			this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_ADDDEPENDENCIES.MESSAGES.NO_UNRESOLVED_DEPENDENCIES));
 			return;
 		}
 
-		this.consoleLogger.result(NodeTranslationService.getMessage(MESSAGES.DEPENDENCIES_ADDED_TO_MANIFEST));
+		this.consoleLogger.result(NodeTranslationService.getMessage(COMMAND_ADDDEPENDENCIES.MESSAGES.DEPENDENCIES_ADDED_TO_MANIFEST));
 
-		this._getDependenciesStringsArray(actionResult.data)
+		this.getDependenciesStringsArray(actionResult.data)
 			.sort()
-			.forEach(output => this.consoleLogger.result(output));
+			.forEach((output) => this.consoleLogger.result(output));
 	}
 
-	_getDependenciesStringsArray(data) {
-		const dependenciesString = [];
+	private getDependenciesStringsArray(data: AddDependenciesData) {
+		const dependenciesString: string[] = [];
 		//Features
-		const features = data.filter(dependency => dependency.type === DEPENDENCY_TYPES.FEATURE.name);
-		features.forEach(feature => {
+		const features = data.filter((dependency) => dependency.type === DEPENDENCY_TYPES.FEATURE.name);
+		features.forEach((feature) => {
 			const requiredOrOptional = feature.required ? FEATURE_REQUIRED : FEATURE_OPTIONAL;
 			dependenciesString.push(`${DEPENDENCY_TYPES.FEATURE.prefix} ${feature.value}:${requiredOrOptional}`);
 		});
 
 		//Files
-		const files = data.filter(dependency => dependency.type === DEPENDENCY_TYPES.FILE.name);
-		files.forEach(file => {
+		const files = data.filter((dependency) => dependency.type === DEPENDENCY_TYPES.FILE.name);
+		files.forEach((file) => {
 			dependenciesString.push(`${DEPENDENCY_TYPES.FILE.prefix} ${file.value}`);
 		});
 
 		//Folders
-		const folders = data.filter(dependency => dependency.type === DEPENDENCY_TYPES.FOLDER.name);
-		folders.forEach(folder => {
+		const folders = data.filter((dependency) => dependency.type === DEPENDENCY_TYPES.FOLDER.name);
+		folders.forEach((folder) => {
 			dependenciesString.push(`${DEPENDENCY_TYPES.FOLDER.prefix} ${folder.value}`);
 		});
 
 		//Objects - Regular, SuiteApp,  Bundle dependencies
-		const objects = data.filter(dependency => dependency.type === DEPENDENCY_TYPES.OBJECT.name);
-		objects.forEach(object => {
+		const objects = data.filter((dependency) => dependency.type === DEPENDENCY_TYPES.OBJECT.name);
+		objects.forEach((object) => {
 			const appIdDisplay = object.appId
 				? `in [${OBJECT_CONTAINER_PREFIX.SUITEAPP} - ${OBJECT_REFERENCE_ATTRIBUTES.APP_ID}${object.appId}]`
 				: '';
@@ -101,8 +111,8 @@ class AddDependenciesOutputFormatter extends OutputFormatter {
 		});
 
 		//Platform Extensions
-		const platformExtensions = data.filter(dependency => dependency.type === DEPENDENCY_TYPES.PLATFORMEXTENSION.name);
-		platformExtensions.forEach(platformExtension => {
+		const platformExtensions = data.filter((dependency) => dependency.type === DEPENDENCY_TYPES.PLATFORMEXTENSION.name);
+		platformExtensions.forEach((platformExtension) => {
 			const appIdDisplay = platformExtension.appId ? `${OBJECT_REFERENCE_ATTRIBUTES.APP_ID}${platformExtension.appId}, ` : '';
 			const objectTypeDisplay = `${OBJECT_REFERENCE_ATTRIBUTES.OBJECT_TYPE}${platformExtension.objectType}`;
 			dependenciesString.push(`${DEPENDENCY_TYPES.PLATFORMEXTENSION.prefix} ${appIdDisplay}${objectTypeDisplay}`);
@@ -111,5 +121,3 @@ class AddDependenciesOutputFormatter extends OutputFormatter {
 		return dependenciesString;
 	}
 }
-
-module.exports = AddDependenciesOutputFormatter;

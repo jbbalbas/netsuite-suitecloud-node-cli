@@ -8,7 +8,7 @@ import FileSystemService from '../FileSystemService';
 import * as FileUtils from '../../utils/FileUtils';
 import CLISettings from './CLISettings';
 import path from 'path';
-import NodeTranslationService from '../NodeTranslationService';
+import { NodeTranslationService } from '../NodeTranslationService';
 import { ERRORS } from '../TranslationKeys';
 
 import { homedir } from 'os';

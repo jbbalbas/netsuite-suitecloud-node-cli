@@ -7,17 +7,39 @@ import { ActionResult, ActionResultBuilder } from './ActionResult';
 import assert from 'assert';
 import { SDK_FALSE } from '../../ApplicationConstants';
 
-type DeployData = string[];
+type ValidateData = {
+    appliedContentProtection: boolean;
+    warnings: {
+        filePath: string;
+        lineNumber: string;
+        message: string;
+    }[];
+    errors: {
+        filePath: string;
+        lineNumber: string;
+        message: string;
+    }[];
+};
 
-export interface DeployActionResult extends ActionResult<DeployData> {
+export interface ValidateActionResult extends ActionResult<ValidateData> {
 	isServerValidation: boolean;
-	appliedContentProtection: string;
-	projectType: string;
+	appliedContentProtection: boolean;
+    projectType: string;
+	warnings?: {
+		filePath: string;
+		lineNumber: string;
+		message: string;
+	}[];
+	errors?: {
+		filePath: string;
+		lineNumber: string;
+		message: string;
+	}[];
 }
 
-export class DeployActionResultBuilder extends ActionResultBuilder<DeployData> {
+export class ValidateActionResultBuilder extends ActionResultBuilder<ValidateData> {
 	isServerValidation: boolean = false;
-	appliedContentProtection: string = SDK_FALSE;
+	appliedContentProtection: boolean = false;
 	projectType!: string;
 
 	constructor() {
@@ -29,7 +51,7 @@ export class DeployActionResultBuilder extends ActionResultBuilder<DeployData> {
 		return this;
 	}
 
-	withAppliedContentProtection(appliedContentProtection: string) {
+	withAppliedContentProtection(appliedContentProtection: boolean) {
 		this.appliedContentProtection = appliedContentProtection;
 		return this;
 	}
@@ -41,10 +63,10 @@ export class DeployActionResultBuilder extends ActionResultBuilder<DeployData> {
 
 	validate() {
 		super.validate();
-		assert(this.projectType, 'project type is required when creating a DeployActionResult');
+		assert(this.projectType, 'project type is required when creating a ValidateActionResult');
 	}
 
-	build(): DeployActionResult {
+	build(): ValidateActionResult {
 		this.validate();
 		return {
 			status: this.status,

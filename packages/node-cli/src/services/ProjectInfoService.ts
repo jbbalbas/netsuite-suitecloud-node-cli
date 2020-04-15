@@ -9,7 +9,7 @@ import { PROJECT_SUITEAPP, PROJECT_ACP, FILES, FOLDERS } from '../ApplicationCon
 import CLIException from '../CLIException';
 import * as FileUtils from '../utils/FileUtils';
 import path from 'path';
-import NodeTranslationService from './NodeTranslationService';
+import { NodeTranslationService } from './NodeTranslationService';
 import xml2js from 'xml2js';
 import assert from 'assert';
 

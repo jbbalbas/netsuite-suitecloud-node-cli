@@ -4,21 +4,20 @@
  */
 'use strict';
 
-const { ERROR } = require('../commands/actionresult/ActionResult');
-const { lineBreak } = require('../loggers/LoggerConstants');
+import { STATUS, ActionResult } from '../commands/actionresult/ActionResult';
+import { lineBreak } from '../loggers/LoggerConstants';
+import ConsoleLogger from '../loggers/ConsoleLogger';
 
-module.exports = {
-	getErrorMessagesString: actionResult => {
-		return actionResult.errorMessages.join(lineBreak);
-	},
+export function getErrorMessagesString(actionResult: ActionResult<any>) {
+	return actionResult.errorMessages.join(lineBreak);
+}
 
-	logResultMessage: (actionResult, consoleLogger) => {
-		if (actionResult.resultMessage) {
-			if (actionResult.status === ERROR) {
-				consoleLogger.error(actionResult.resultMessage);
-			} else {
-				consoleLogger.result(actionResult.resultMessage);
-			}
+export function logResultMessage(actionResult: ActionResult<any>, consoleLogger: ConsoleLogger) {
+	if (actionResult.resultMessage) {
+		if (actionResult.status === STATUS.ERROR) {
+			consoleLogger.error(actionResult.resultMessage);
+		} else {
+			consoleLogger.result(actionResult.resultMessage);
 		}
-	},
-};
+	}
+}
