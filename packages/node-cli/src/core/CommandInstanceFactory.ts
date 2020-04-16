@@ -9,6 +9,7 @@ import { InteractiveCommandInfo, NonInteractiveCommandInfo } from '../../types/M
 import BaseCommandGenerator from '../commands/BaseCommandGenerator';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { BaseCommandAnswer } from '../../types/CommandAnswers';
+import ConsoleLogger from '../loggers/ConsoleLogger';
 
 export default class CommandInstanceFactory {
 	async create(options: {
@@ -16,6 +17,7 @@ export default class CommandInstanceFactory {
 		projectFolder: string;
 		executionPath: string;
 		runInInteractiveMode: boolean;
+		consoleLogger: ConsoleLogger;
 	}) {
 		assert(options);
 		assert(options.commandMetadata);

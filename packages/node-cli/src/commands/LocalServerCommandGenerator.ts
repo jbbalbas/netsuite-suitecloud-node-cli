@@ -8,13 +8,15 @@ import LocalCommand from '@oracle/suitecloud-cli-localserver-command';
 
 import { COLORS } from '../loggers/LoggerConstants';
 import { COMMAND_LOCAL } from './../services/TranslationKeys';
-import NodeTranslationService from './../services/NodeTranslationService';
+import { NodeTranslationService } from './../services/NodeTranslationService';
 import { LocalCommandOptions } from '../../types/CommandOptions';
 import { Prompt } from '../../types/Prompt';
 import FileSystemService from '../services/FileSystemService';
+import { ActionResultBuilder } from './actionresult/ActionResult';
 
 export default class LocalServerCommandGenerator extends BaseCommandGenerator<LocalCommandOptions, any> {
 	local: any;
+	protected actionResultBuilder = new ActionResultBuilder();
 
 	constructor(options: LocalCommandOptions) {
 
@@ -33,6 +35,7 @@ export default class LocalServerCommandGenerator extends BaseCommandGenerator<Lo
 
 	public executeAction(answers: any) {
 		this.local.initialize();
+		// TODO: ensure this.local.executeAction returns an ActionResult
 		return this.local.executeAction(answers);
 	}
 };

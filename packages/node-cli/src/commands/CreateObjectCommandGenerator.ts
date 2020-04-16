@@ -14,10 +14,12 @@ import { FOLDERS } from '../ApplicationConstants';
 import { CreateObjectCommandAnswer } from '../../types/CommandAnswers';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { Prompt } from '../../types/Prompt';
+import { CreateObjectActionResultBuilder } from './actionresult/CreateObjectActionResult';
 
 export default class CreateObjectCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, CreateObjectCommandAnswer> {
 
 	private fileSystemService: FileSystemService;
+	protected actionResultBuilder = new CreateObjectActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -95,7 +97,7 @@ export default class CreateObjectCommandGenerator extends BaseCommandGenerator<B
 		});
 	}
 
-	public executeAction(answers: CreateObjectCommandAnswer) {
+	public async executeAction(answers: CreateObjectCommandAnswer) {
 		const createFilePromise = this.fileSystemService.createFileFromTemplate({
 			template: TemplateKeys.SCRIPTS['blankscript'],
 			destinationFolder: answers.relatedfiledestinationfolder,
@@ -109,8 +111,8 @@ export default class CreateObjectCommandGenerator extends BaseCommandGenerator<B
 			fileExtension: 'xml',
 			bindings: [{ id: 'scriptid', value: answers.type.prefix + answers.objectfilename }],
 		});
-		return Promise.all([createFilePromise, createObjectPromise]).then(() => {
-			console.log(`${answers.objectfilename} & ${answers.relatedfilename} were created successfully.`);
-		});
+		await Promise.all([createFilePromise, createObjectPromise]);
+		console.log(`${answers.objectfilename} & ${answers.relatedfilename} were created successfully.`);
+		return this.actionResultBuilder.success().build();
 	}
 };

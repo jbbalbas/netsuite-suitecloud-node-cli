@@ -5,9 +5,9 @@
 'use strict';
 import assert from 'assert';
 import OutputFormatter from '../commands/outputFormatters/OutputFormatter';
-import { BaseCommandParameters } from '../../types/CommandOptions';
-import { OperationResult } from '../../types/OperationResult';
+import { CommandParameters } from '../../types/CommandOptions';
 import { InteractiveCommandInfo, NonInteractiveCommandInfo } from '../../types/Metadata';
+import ConsoleLogger from '../loggers/ConsoleLogger';
 
 export default class Command {
 	public commandMetadata: InteractiveCommandInfo | NonInteractiveCommandInfo;;
@@ -16,7 +16,8 @@ export default class Command {
 	public preActionFunc: Function;
 	public action: Function;
 	protected options?: {[x: string]: string};
-	public formatOutputFunc?: (x: OperationResult) => void;
+	public outputFormatter: OutputFormatter;
+	public consoleLogger?: ConsoleLogger;
 
 	constructor(options: CommandParameters) {
 		assert(options);

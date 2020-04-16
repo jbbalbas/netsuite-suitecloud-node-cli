@@ -3,40 +3,30 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-import { ActionResult } from '../commands/actionresult/ActionResult';
-import ActionResultUtils from '../utils/ActionResultUtils';
 
 import path from 'path';
 import inquirer from 'inquirer';
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import FileSystemService from '../services/FileSystemService';
 import { executeWithSpinner } from '../ui/CliSpinner';
-import * as NodeUtils from '../utils/NodeUtils';
 import SDKExecutionContext from '../SDKExecutionContext';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import UpdateOutputFormatter from './outputFormatters/UpdateOutputFormatter';
-
 import { COMMAND_UPDATE, YES, NO } from '../services/TranslationKeys';
-
 import { validateArrayIsNotEmpty, validateScriptId, showValidationResults } from '../validation/InteractiveAnswersValidator';
-
 import { FOLDERS } from '../ApplicationConstants';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { Prompt } from '../../types/Prompt';
 import { UpdateCommandAnswer } from '../../types/CommandAnswers';
-import { UpdateOperationResult } from '../../types/OperationResult';
-const ANSWERS_NAMES = {
-	FILTER_BY_SCRIPT_ID: 'filterByScriptId',
-	OVERWRITE_OBJECTS: 'overwriteObjects',
-	SCRIPT_ID_LIST: 'scriptid',
-	SCRIPT_ID_FILTER: 'scriptIdFilter',
-};
+import { ActionResultBuilder } from './actionresult/ActionResult';
 
-const COMMAND_OPTIONS = {
-	PROJECT: 'project',
-	SCRIPT_ID: 'scriptid',
+enum ANSWERS_NAMES {
+	FILTER_BY_SCRIPT_ID = 'filterByScriptId',
+	OVERWRITE_OBJECTS = 'overwriteObjects',
+	SCRIPT_ID_LIST = 'scriptid',
+	SCRIPT_ID_FILTER = 'scriptIdFilter',
 };
 
 const MAX_ENTRIES_BEFORE_FILTER = 30;
@@ -45,6 +35,7 @@ const XML_EXTENSION = '.xml';
 export default class UpdateCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, UpdateCommandAnswer> {
 
 	private fileSystemService: FileSystemService;
+	protected actionResultBuilder = new ActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -152,16 +143,16 @@ export default class UpdateCommandGenerator extends BaseCommandGenerator<BaseCom
 
 			const operationResult = await executeWithSpinner({
 				action: this.sdkExecutor.execute(executionContextForUpdate),
-				message: NodeTranslationService.getMessage(MESSAGES.UPDATING_OBJECTS),
+				message: NodeTranslationService.getMessage(COMMAND_UPDATE.MESSAGES.UPDATING_OBJECTS),
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? ActionResult.Builder.withData(operationResult.data)
+				? this.actionResultBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
 						.build()
-				: ActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return ActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

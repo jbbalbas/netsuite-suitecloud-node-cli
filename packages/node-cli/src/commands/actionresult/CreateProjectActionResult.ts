@@ -18,7 +18,7 @@ export interface CreateProjectActionResult extends ActionResult<CreateProjectDat
 	projectType: string;
 	projectName: string;
 	projectDirectory: string;
-	includeUnitTesting: boolean;
+	includeUnitTesting: string;
 	npmInstallSuccess: boolean;
 }
 
@@ -27,7 +27,7 @@ export class CreateProjectActionResultBuilder extends ActionResultBuilder<Create
 	projectType!: string;
 	projectName!: string;
 	projectDirectory!: string;
-	includeUnitTesting!: boolean;
+	includeUnitTesting!: string;
 	npmPackageInitialized!: boolean;
 
 	constructor() {
@@ -49,12 +49,12 @@ export class CreateProjectActionResultBuilder extends ActionResultBuilder<Create
 		return this;
 	}
 
-	withUnitTesting(includeUnitTesting: boolean) {
+	withUnitTesting(includeUnitTesting: string) {
 		this.includeUnitTesting = includeUnitTesting;
 		return this;
 	}
 
-	withNpmPackageInitialized(npmPackageInitialized: boolean) {
+	withNpmPackageInitialized(npmPackageInitialized: boolean = false) {
 		this.npmPackageInitialized = npmPackageInitialized;
 		return this;
 	}

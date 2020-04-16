@@ -4,8 +4,6 @@
  */
 'use strict';
 
-
-const UploadFilesOutputFormatter = require('./outputFormatters/UploadFilesOutputFormatter');
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
 import { executeWithSpinner } from '../ui/CliSpinner';
@@ -15,19 +13,13 @@ import path from 'path';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import UploadFilesOutputFormatter from './outputFormatters/UploadFilesOutputFormatter';
 import SDKExecutionContext from '../SDKExecutionContext';
-import NodeTranslationService from '../services/NodeTranslationService';
-import { ActionResult } from '../commands/actionresult/ActionResult';
-import { COMMAND_UPLOADFILES, NO, YES} from '../services/TranslationKeys';
-import * as ApplicationConstants from '../ApplicationConstants';
-import { BaseCommandOptions } from '../../types/Metadata';
-
-const {
-	COMMAND_UPLOADFILES: { QUESTIONS, MESSAGES },
-	NO,
-	YES,
-} = require('../services/TranslationKeys');
-
-const { FILE_CABINET } = require('../ApplicationConstants').FOLDERS;
+import { NodeTranslationService } from '../services/NodeTranslationService';
+import { ActionResultBuilder } from '../commands/actionresult/ActionResult';
+import { COMMAND_UPLOADFILES, YES, NO } from '../services/TranslationKeys';
+import { FOLDERS } from '../ApplicationConstants';
+import { BaseCommandParameters } from '../../types/CommandOptions';
+import { UploadFilesCommandAnswer } from '../../types/CommandAnswers';
+import { Prompt } from '../../types/Prompt';
 
 const COMMAND_OPTIONS = {
 	PATHS: 'paths',
@@ -39,43 +31,49 @@ const COMMAND_ANSWERS = {
 	OVERWRITE_FILES: 'overwrite',
 };
 
-const { validateArrayIsNotEmpty, showValidationResults } = require('../validation/InteractiveAnswersValidator');
+import { validateArrayIsNotEmpty, showValidationResults } from '../validation/InteractiveAnswersValidator';
 
-module.exports = class UploadFilesCommandGenerator extends BaseCommandGenerator {
-	constructor(options) {
+export default class UploadFilesCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, UploadFilesCommandAnswer> {
+
+	private fileSystemService: FileSystemService;
+	private localFileCabinetFolder: string;
+	private fileCabinetService: FileCabinetService;
+	protected actionResultBuilder = new ActionResultBuilder();
+
+	constructor(options: BaseCommandParameters) {
 		super(options);
-		this._fileSystemService = new FileSystemService();
-		this._localFileCabinetFolder = path.join(this._projectFolder, FILE_CABINET);
-		this._fileCabinetService = new FileCabinetService(this._localFileCabinetFolder);
-		this._outputFormatter = new UploadFilesOutputFormatter(options.consoleLogger);
+		this.fileSystemService = new FileSystemService();
+		this.localFileCabinetFolder = path.join(this.projectFolder, FOLDERS.FILE_CABINET);
+		this.fileCabinetService = new FileCabinetService(this.localFileCabinetFolder);
+		this.outputFormatter = new UploadFilesOutputFormatter(options.consoleLogger);
 	}
 
-	async _getCommandQuestions(prompt) {
-		const selectFolderQuestion = this._generateSelectFolderQuestion();
+	public async getCommandQuestions(prompt: Prompt<UploadFilesCommandAnswer>) {
+		const selectFolderQuestion = this.generateSelectFolderQuestion();
 		const selectFolderAnswer = await prompt(selectFolderQuestion);
 
-		const selectFilesQuestion = this._generateSelectFilesQuestion(selectFolderAnswer.selectedFolder);
+		const selectFilesQuestion = this.generateSelectFilesQuestion(selectFolderAnswer.selectedFolder);
 		const selectFilesAnswer = await prompt(selectFilesQuestion);
 
-		const overwriteAnswer = await prompt([this._generateOverwriteQuestion()]);
-		if (overwriteAnswer[COMMAND_ANSWERS.OVERWRITE_FILES] === false) {
-			throw NodeTranslationService.getMessage(MESSAGES.CANCEL_UPLOAD);
+		const overwriteAnswer = await prompt([this.generateOverwriteQuestion()]);
+		if (overwriteAnswer.overwrite === false) {
+			throw NodeTranslationService.getMessage(COMMAND_UPLOADFILES.MESSAGES.CANCEL_UPLOAD);
 		}
 
 		return selectFilesAnswer;
 	}
 
-	_generateSelectFolderQuestion() {
-		const localFileCabinetSubFolders = this._fileCabinetService.getFileCabinetFolders();
+	private generateSelectFolderQuestion() {
+		const localFileCabinetSubFolders = this.fileCabinetService.getFileCabinetFolders();
 
-		const transformFoldersToChoicesFunc = folder => {
-			const name = this._fileCabinetService.getFileCabinetRelativePath(folder);
+		const transformFoldersToChoicesFunc = (folder: string) => {
+			const name = this.fileCabinetService.getFileCabinetRelativePath(folder);
 
 			let disabledMessage = '';
-			if (!this._fileCabinetService.isUnrestrictedPath(name)) {
-				disabledMessage = NodeTranslationService.getMessage(MESSAGES.RESTRICTED_FOLDER);
-			} else if (!this._fileSystemService.getFilesFromDirectory(folder).length) {
-				disabledMessage = NodeTranslationService.getMessage(MESSAGES.EMPTY_FOLDER);
+			if (!this.fileCabinetService.isUnrestrictedPath(name)) {
+				disabledMessage = NodeTranslationService.getMessage(COMMAND_UPLOADFILES.MESSAGES.RESTRICTED_FOLDER);
+			} else if (!this.fileSystemService.getFilesFromDirectory(folder).length) {
+				disabledMessage = NodeTranslationService.getMessage(COMMAND_UPLOADFILES.MESSAGES.EMPTY_FOLDER);
 			}
 
 			return {
@@ -88,12 +86,12 @@ module.exports = class UploadFilesCommandGenerator extends BaseCommandGenerator 
 		const localFileCabinetFoldersChoices = localFileCabinetSubFolders.map(transformFoldersToChoicesFunc);
 
 		if (!localFileCabinetFoldersChoices.some(choice => !choice.disabled)) {
-			throw NodeTranslationService.getMessage(MESSAGES.NOTHING_TO_UPLOAD);
+			throw NodeTranslationService.getMessage(COMMAND_UPLOADFILES.MESSAGES.NOTHING_TO_UPLOAD);
 		}
 
 		return [
 			{
-				message: NodeTranslationService.getMessage(QUESTIONS.SELECT_FOLDER),
+				message: NodeTranslationService.getMessage(COMMAND_UPLOADFILES.QUESTIONS.SELECT_FOLDER),
 				type: CommandUtils.INQUIRER_TYPES.LIST,
 				name: COMMAND_ANSWERS.SELECTED_FOLDER,
 				choices: localFileCabinetFoldersChoices,
@@ -101,31 +99,31 @@ module.exports = class UploadFilesCommandGenerator extends BaseCommandGenerator 
 		];
 	}
 
-	_generateSelectFilesQuestion(selectedFolder) {
-		const files = this._fileSystemService.getFilesFromDirectory(selectedFolder);
+	private generateSelectFilesQuestion(selectedFolder: string) {
+		const files = this.fileSystemService.getFilesFromDirectory(selectedFolder);
 
-		const transformFilesToChoicesFunc = file => {
-			const path = this._fileCabinetService.getFileCabinetRelativePath(file);
+		const transformFilesToChoicesFunc = (file: string) => {
+			const path = this.fileCabinetService.getFileCabinetRelativePath(file);
 			return { name: path, value: path };
 		};
 		const filesChoices = files.map(transformFilesToChoicesFunc);
 
 		return [
 			{
-				message: NodeTranslationService.getMessage(QUESTIONS.SELECT_FILES),
+				message: NodeTranslationService.getMessage(COMMAND_UPLOADFILES.QUESTIONS.SELECT_FILES),
 				type: CommandUtils.INQUIRER_TYPES.CHECKBOX,
 				name: COMMAND_OPTIONS.PATHS,
 				choices: filesChoices,
-				validate: fieldValue => showValidationResults(fieldValue, validateArrayIsNotEmpty),
+				validate: (fieldValue: string) => showValidationResults(fieldValue, validateArrayIsNotEmpty),
 			},
 		];
 	}
 
-	_generateOverwriteQuestion() {
+	private generateOverwriteQuestion() {
 		return {
 			type: CommandUtils.INQUIRER_TYPES.LIST,
 			name: COMMAND_ANSWERS.OVERWRITE_FILES,
-			message: NodeTranslationService.getMessage(QUESTIONS.OVERWRITE_FILES),
+			message: NodeTranslationService.getMessage(COMMAND_UPLOADFILES.QUESTIONS.OVERWRITE_FILES),
 			default: 0,
 			choices: [
 				{ name: NodeTranslationService.getMessage(YES), value: true },
@@ -134,39 +132,38 @@ module.exports = class UploadFilesCommandGenerator extends BaseCommandGenerator 
 		};
 	}
 
-	_preExecuteAction(answers) {
-		const { PROJECT, PATHS } = COMMAND_OPTIONS;
-		answers[PROJECT] = CommandUtils.quoteString(this._projectFolder);
-		if (answers.hasOwnProperty(PATHS)) {
-			if (Array.isArray(answers[PATHS])) {
-				answers[PATHS] = answers[PATHS].map(CommandUtils.quoteString).join(' ');
+	public preExecuteAction(answers: UploadFilesCommandAnswer) {
+		answers.project = CommandUtils.quoteString(this.projectFolder);
+		if (answers.hasOwnProperty('paths')) {
+			if (Array.isArray(answers.paths)) {
+				answers.paths = answers.paths.map(CommandUtils.quoteString).join(' ');
 			} else {
-				answers[PATHS] = CommandUtils.quoteString(answers[PATHS]);
+				answers.paths = CommandUtils.quoteString(answers.paths);
 			}
 		}
 		return answers;
 	}
 
-	async _executeAction(answers) {
+	public async executeAction(answers: UploadFilesCommandAnswer) {
 		try {
 			const executionContextUploadFiles = new SDKExecutionContext({
-				command: this._commandMetadata.sdkCommand,
+				command: this.commandMetadata.sdkCommand,
 				includeProjectDefaultAuthId: true,
 				params: answers,
 			});
 
 			const operationResult = await executeWithSpinner({
-				action: this._sdkExecutor.execute(executionContextUploadFiles),
-				message: NodeTranslationService.getMessage(MESSAGES.UPLOADING_FILES),
+				action: this.sdkExecutor.execute(executionContextUploadFiles),
+				message: NodeTranslationService.getMessage(COMMAND_UPLOADFILES.MESSAGES.UPLOADING_FILES),
 			});
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? ActionResult.Builder.withData(operationResult.data)
+				? this.actionResultBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
-						.withProjectFolder(this._projectFolder)
+						.withProjectFolder(this.projectFolder)
 						.build()
-				: ActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return ActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

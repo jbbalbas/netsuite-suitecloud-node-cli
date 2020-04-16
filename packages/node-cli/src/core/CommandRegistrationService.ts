@@ -8,7 +8,7 @@ import assert from 'assert';
 const OPTION_TYPE_FLAG = 'FLAG';
 const INTERACTIVE_OPTION_NAME = 'interactive';
 const INTERACTIVE_OPTION_ALIAS = 'i';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { COMMAND_OPTION_INTERACTIVE_HELP } from '../services/TranslationKeys';
 import { SKDCommandOption, NodeCommandOption, InteractiveCommandInfo, NonInteractiveCommandInfo } from '../../types/Metadata';
 import { CommanderStatic, Command as LocalCommand } from 'commander';

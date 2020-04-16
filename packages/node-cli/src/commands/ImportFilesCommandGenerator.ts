@@ -4,11 +4,9 @@
  */
 'use strict';
 
-import { ActionResult } from '../commands/actionresult/ActionResult';
-import ActionResultUtils from '../utils/ActionResultUtils';
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { executeWithSpinner } from '../ui/CliSpinner';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import SDKExecutionContext from '../SDKExecutionContext';
@@ -18,30 +16,29 @@ import { COMMAND_IMPORTFILES, NO, YES} from '../services/TranslationKeys';
 import { validateArrayIsNotEmpty, showValidationResults} from '../validation/InteractiveAnswersValidator';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { ImportFilesCommandAnswer } from '../../types/CommandAnswers';
-import { ImportFilesOperationResult } from '../../types/OperationResult';
 import { Prompt } from '../../types/Prompt';
 import ImportFilesOutputFormatter from './outputFormatters/ImportFilesOutputFormatter';
+import { ActionResultBuilder } from './actionresult/ActionResult';
 
 const SUITE_SCRIPTS_FOLDER = '/SuiteScripts';
-const COMMAND_OPTIONS = {
-	FOLDER: 'folder',
-	PATHS: 'paths',
-	EXCLUDE_PROPERTIES: 'excludeproperties',
-	PROJECT: 'project',
+enum COMMAND_OPTIONS {
+	FOLDER = 'folder',
+	PATHS = 'paths',
+	EXCLUDE_PROPERTIES = 'excludeproperties',
+	PROJECT = 'project',
 };
-const INTERMEDIATE_COMMANDS = {
-	LISTFILES: 'listfiles',
-	LISTFOLDERS: 'listfolders',
+enum INTERMEDIATE_COMMANDS {
+	LISTFILES = 'listfiles',
+	LISTFOLDERS = 'listfolders',
 };
-const COMMAND_ANSWERS = {
-	OVERWRITE_FILES: 'overwrite',
+enum COMMAND_ANSWERS {
+	OVERWRITE_FILES = 'overwrite',
 };
-
-const { validateArrayIsNotEmpty, showValidationResults } = require('../validation/InteractiveAnswersValidator');
 
 
 export default class ImportFilesCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, ImportFilesCommandAnswer> {
 	private projectInfoService: ProjectInfoService;
+	protected actionResultBuilder = new ActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -194,12 +191,10 @@ export default class ImportFilesCommandGenerator extends BaseCommandGenerator<Ba
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? ActionResult.Builder.withData(operationResult.data)
-						.withResultMessage(operationResult.resultMessage)
-						.build()
-				: ActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				? this.actionResultBuilder.withData(operationResult.data).withResultMessage(operationResult.resultMessage).build()
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return ActionResult.Builder.withErrors([error]).build;
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

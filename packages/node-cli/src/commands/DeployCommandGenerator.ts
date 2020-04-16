@@ -4,15 +4,14 @@
  */
 'use strict';
 
-import SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import { ActionResult } from '../commands/actionresult/ActionResult';
-import DeployActionResult from '../commands/actionresult/DeployActionResult';
+import { DeployActionResult, DeployActionResultBuilder } from '../commands/actionresult/DeployActionResult';
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
 import ProjectInfoService from '../services/ProjectInfoService';
 import AccountSpecificArgumentHandler from '../utils/AccountSpecificValuesArgumentHandler';
 import ApplyContentProtectinoArgumentHandler from '../utils/ApplyContentProtectionArgumentHandler';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { executeWithSpinner } from '../ui/CliSpinner';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import SDKExecutionContext from '../SDKExecutionContext';
@@ -21,9 +20,9 @@ import { LINKS, PROJECT_ACP, PROJECT_SUITEAPP, SDK_TRUE } from '../ApplicationCo
 import { COMMAND_DEPLOY, NO, YES } from '../services/TranslationKeys';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { DeployCommandAnswer } from '../../types/CommandAnswers';
-import { DeployOperationResult } from '../../types/OperationResult';
 import { Prompt } from '../../types/Prompt';
 import DeployOutputFormatter from './outputFormatters/DeployOutputFormatter';
+import ApplyContentProtectionArgumentHandler from '../utils/ApplyContentProtectionArgumentHandler';
 
 
 const COMMAND = {
@@ -40,9 +39,9 @@ const COMMAND = {
 	},
 };
 
-const ACCOUNT_SPECIFIC_VALUES_OPTIONS = {
-	ERROR: 'ERROR',
-	WARNING: 'WARNING',
+enum ACCOUNT_SPECIFIC_VALUES_OPTIONS {
+	ERROR = 'ERROR',
+	WARNING = 'WARNING',
 };
 
 export default class DeployCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, DeployCommandAnswer> {
@@ -50,6 +49,7 @@ export default class DeployCommandGenerator extends BaseCommandGenerator<BaseCom
 	private projectType: string;
 	private accountSpecificValuesArgumentHandler: AccountSpecificArgumentHandler;
 	private applyContentProtectionArgumentHandler: ApplyContentProtectinoArgumentHandler;
+	protected actionResultBuilder = new DeployActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -62,10 +62,10 @@ export default class DeployCommandGenerator extends BaseCommandGenerator<BaseCom
 			projectInfoService: this.projectInfoService,
 			commandName: this.commandMetadata.sdkCommand,
 		});
-		this._outputFormatter = new DeployOutputFormatter(options.consoleLogger);
+		this.outputFormatter = new DeployOutputFormatter(options.consoleLogger);
 	}
 
-	public async _getCommandQuestions(prompt: Prompt<DeployCommandAnswer>) {
+	public async getCommandQuestions(prompt: Prompt<DeployCommandAnswer>) {
 		const isSuiteAppProject = this.projectType === PROJECT_SUITEAPP;
 		const isACProject = this.projectType === PROJECT_ACP;
 
@@ -123,7 +123,7 @@ export default class DeployCommandGenerator extends BaseCommandGenerator<BaseCom
 		return answers;
 	}
 
-	public _preExecuteAction(args: any) {
+	public preExecuteAction(args: any) {
 		this.accountSpecificValuesArgumentHandler.validate(args);
 		this.applyContentProtectionArgumentHandler.validate(args);
 
@@ -156,19 +156,19 @@ export default class DeployCommandGenerator extends BaseCommandGenerator<BaseCom
 			});
 
 			const isServerValidation = SDKParams[COMMAND.FLAGS.VALIDATE] ? true : false;
-			const isApplyContentProtection = this._projectType === PROJECT_SUITEAPP && SDKParams[COMMAND.OPTIONS.APPLY_CONTENT_PROTECTION] === SDK_TRUE;
+			const isApplyContentProtection = this.projectType === PROJECT_SUITEAPP && SDKParams[COMMAND.OPTIONS.APPLY_CONTENT_PROTECTION] === SDK_TRUE;
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? DeployActionResult.Builder.withData(operationResult.data)
+				? this.actionResultBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
 						.withServerValidation(isServerValidation)
 						.withAppliedContentProtection(isApplyContentProtection)
 						.withProjectType(this.projectType)
 						.withProjectFolder(this.projectFolder)
 						.build()
-				: DeployActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return DeployActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

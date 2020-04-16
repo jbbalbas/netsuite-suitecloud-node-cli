@@ -4,16 +4,15 @@
  */
 'use strict';
 
-import { ActionResult } from '../commands/actionresult/ActionResult';
+import { ActionResultBuilder } from '../commands/actionresult/ActionResult';
 
 import inquirer from 'inquirer';
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
 import { executeWithSpinner } from '../ui/CliSpinner';
-import * as NodeUtils from '../utils/NodeUtils';
 import OBJECT_TYPES from '../metadata/ObjectTypesMetadata';
 import ProjectInfoService from '../services/ProjectInfoService';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import SDKExecutionContext from '../SDKExecutionContext';
 import ListObjectsOutputFormatter from './outputFormatters/ListObjectsOutputFormatter';
@@ -28,20 +27,21 @@ import { PROJECT_SUITEAPP } from '../ApplicationConstants';
 import { COMMAND_LISTOBJECTS, YES, NO } from '../services/TranslationKeys';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { ListObjectsCommandAnswer } from '../../types/CommandAnswers';
-import { ListObjectsOperationResult } from '../../types/OperationResult';
 import { Prompt, PromptParameters } from '../../types/Prompt';
 
-const COMMAND_QUESTIONS_NAMES = {
-	APP_ID: 'appid',
-	SCRIPT_ID: 'scriptid',
-	SPECIFY_SCRIPT_ID: 'specifyscriptid',
-	SPECIFY_SUITEAPP: 'specifysuiteapp',
-	TYPE: 'type',
-	TYPE_ALL: 'typeall',
+enum COMMAND_QUESTIONS_NAMES {
+	APP_ID = 'appid',
+	SCRIPT_ID = 'scriptid',
+	SPECIFY_SCRIPT_ID = 'specifyscriptid',
+	SPECIFY_SUITEAPP = 'specifysuiteapp',
+	TYPE = 'type',
+	TYPE_ALL = 'typeall',
 };
 
 export default class ListObjectsCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, ListObjectsCommandAnswer> {
 	private projectInfoService: ProjectInfoService;
+	protected actionResultBuilder = new ActionResultBuilder();
+	
 	constructor(options: BaseCommandParameters) {
 		super(options);
 		this.projectInfoService = new ProjectInfoService(this.projectFolder);
@@ -132,7 +132,7 @@ export default class ListObjectsCommandGenerator extends BaseCommandGenerator<Ba
 				includeProjectDefaultAuthId: true,
 			});
 
-			const actionListObjects = this._sdkExecutor.execute(executionContext);
+			const actionListObjects = this.sdkExecutor.execute(executionContext);
 
 			const operationResult = await executeWithSpinner({
 				action: actionListObjects,
@@ -140,12 +140,12 @@ export default class ListObjectsCommandGenerator extends BaseCommandGenerator<Ba
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? ActionResult.Builder.withData(operationResult.data)
+				? this.actionResultBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
 						.build()
-				: ActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return ActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

@@ -13,19 +13,20 @@ import {
 } from './ApplicationConstants';
 import SDKProperties from './core/sdksetup/SDKProperties';
 import path from 'path';
+import os from 'os';
 import * as FileUtils from './utils/FileUtils';
 import { spawn } from 'child_process';
 import CLISettingsService from './services/settings/CLISettingsService';
 import EnvironmentInformationService from './services/EnvironmentInformationService';
 import url from 'url';
-import NodeTranslationService from './services/NodeTranslationService';
+import { NodeTranslationService } from './services/NodeTranslationService';
 import { ERRORS } from './services/TranslationKeys';
 import SDKErrorCodes from './SDKErrorCodes';
 import AuthenticationService from './core/authentication/AuthenticationService'
 import SDKExecutionContext from "./SDKExecutionContext";
 import { OperationResult } from '../types/OperationResult';
 
-const HOME_PATH = require('os').homedir();
+const HOME_PATH = os.homedir();
 const DATA_EVENT = 'data';
 const CLOSE_EVENT = 'close';
 const UTF8 = 'utf8';

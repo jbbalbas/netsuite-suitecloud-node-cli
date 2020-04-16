@@ -34,12 +34,14 @@ export class SetupActionResultBuilder extends ActionResultBuilder<null> {
 		return this;
 	}
 
-	withMode(mode: string) {
+	// TODO remove default value
+	withMode(mode: string = '') {
 		this.mode = mode;
 		return this;
 	}
 
-	withAuthId(authId: string) {
+	// TODO remove default value
+	withAuthId(authId: string = '') {
 		this.authId = authId;
 		return this;
 	}

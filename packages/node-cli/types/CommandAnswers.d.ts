@@ -53,9 +53,9 @@ export interface ListObjectsCommandAnswer extends BaseCommandAnswer {
 }
 
 export interface ProxyCommandAnswer extends BaseCommandAnswer {
-	isSettingProxy?: boolean;
-	proxyUrl?: string;
-	proxyOverrided?: boolean;
+	isSettingProxy: boolean;
+	proxyUrl: string;
+	isProxyOverridden?: boolean;
 	set?: string;
 	clear?: boolean;
 }
@@ -94,6 +94,13 @@ export interface SetupCommandAnswer extends BaseCommandAnswer {
 	};
 	createNewAuthentication?: boolean,
 	mode?: string,
+}
+
+export interface UploadFilesCommandAnswer extends BaseCommandAnswer {
+	selectedFolder: string;
+	overwrite: boolean;
+	project: string;
+	paths: string[] | string;
 }
 
 export interface CreateProjectCommandAnswer extends BaseCommandAnswer {

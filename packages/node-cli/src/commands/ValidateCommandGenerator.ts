@@ -4,9 +4,8 @@
  */
 
 'use strict';
-import { ActionResult } from '../commands/actionresult/ActionResult';
+
 import { ValidateActionResultBuilder } from '../commands/actionresult/ValidateActionResult';
-import * as ActionResultUtils from '../utils/ActionResultUtils';
 
 import BaseCommandGenerator from './BaseCommandGenerator';
 import SDKExecutionContext from '../SDKExecutionContext';
@@ -22,27 +21,25 @@ import { COMMAND_VALIDATE, YES, NO } from '../services/TranslationKeys';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { Prompt } from '../../types/Prompt';
 import { ValidateCommandAnswers } from '../../types/CommandAnswers';
-import { ValidateOperationResult, ValidateOperationSdkParams } from '../../types/OperationResult';
-import { ColorSupport, Chalk } from 'chalk';
 import ValidateOutputFormatter from './outputFormatters/ValidateOutputFormatter';
 
-const COMMAND_OPTIONS = {
-	SERVER: 'server',
-	ACCOUNT_SPECIFIC_VALUES: 'accountspecificvalues',
-	APPLY_CONTENT_PROTECTION: 'applycontentprotection',
-	PROJECT: 'project',
+enum COMMAND_OPTIONS {
+	SERVER = 'server',
+	ACCOUNT_SPECIFIC_VALUES = 'accountspecificvalues',
+	APPLY_CONTENT_PROTECTION = 'applycontentprotection',
+	PROJECT = 'project',
 };
 
-const ACCOUNT_SPECIFIC_VALUES_OPTIONS = {
-	ERROR: 'ERROR',
-	WARNING: 'WARNING',
+enum ACCOUNT_SPECIFIC_VALUES_OPTIONS {
+	ERROR = 'ERROR',
+	WARNING = 'WARNING',
 };
 
 export default class ValidateCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, ValidateCommandAnswers> {
 	private projectInfoService: ProjectInfoService;
 	private accountSpecificValuesArgumentHandler: AccountSpecificArgumentHandler;
 	private applyContentProtectionArgumentHandler: ApplyContentProtectinoArgumentHandler;
-	private responseBuilder = new ValidateActionResultBuilder();
+	protected actionResultBuilder = new ValidateActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -160,16 +157,16 @@ export default class ValidateCommandGenerator extends BaseCommandGenerator<BaseC
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? this.responseBuilder.withData(operationResult.data)
+				? this.actionResultBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
 						.withServerValidation(isServerValidation)
 						.withAppliedContentProtection(SDKParams[COMMAND_OPTIONS.APPLY_CONTENT_PROTECTION] === SDK_TRUE)
 						.withProjectType(this.projectInfoService.getProjectType())
 						.withProjectFolder(this.projectFolder)
 						.build()
-				: this.responseBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return this.responseBuilder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

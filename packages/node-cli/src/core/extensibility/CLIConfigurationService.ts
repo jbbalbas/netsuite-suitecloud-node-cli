@@ -8,7 +8,7 @@ import { NodeVM } from 'vm2';
 import { lineBreak } from '../../loggers/LoggerConstants';
 import * as FileUtils from '../../utils/FileUtils';
 import path from 'path';
-import NodeTranslationService from './../../services/NodeTranslationService';
+import { NodeTranslationService } from './../../services/NodeTranslationService';
 import { ERRORS } from './../../services/TranslationKeys';
 import CommandUserExtension from './CommandUserExtension';
 const CLI_CONFIG_JS_FILE = 'suitecloud.config.js';

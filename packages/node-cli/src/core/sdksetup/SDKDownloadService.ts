@@ -10,9 +10,9 @@ import request from 'request-promise-native';
 import SDKProperties from './SDKProperties';
 import { homedir } from 'os';
 import { FOLDERS } from '../../ApplicationConstants';
-import NodeConsoleLogger from '../../loggers/NodeConsoleLogger';
+import { NodeConsoleLogger } from '../../loggers/NodeConsoleLogger';
 import { unwrapExceptionMessage } from '../../utils/ExceptionUtils';
-import NodeTranslationService from '../../services/NodeTranslationService';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 import FileSystemService from '../../services/FileSystemService';
 import { executeWithSpinner } from '../../ui/CliSpinner';
 import {
@@ -35,10 +35,10 @@ export function download() {
 		action: downloadFile(fullURL, sdkDirectory),
 		message: NodeTranslationService.getMessage(DOWNLOADING_SUITECLOUD_SDK, fullURL),
 	})
-		.then(() => NodeConsoleLogger.info(NodeTranslationService.getMessage(DOWNLOADING_SUITECLOUD_SDK_SUCCESS))
-		.catch(error =>
-			NodeConsoleLogger.error(NodeTranslationService.getMessage(DOWNLOADING_SUITECLOUD_SDK_ERROR, fullURL, unwrapExceptionMessage(error)))
-		);
+	.then(() => NodeConsoleLogger.info(NodeTranslationService.getMessage(DOWNLOADING_SUITECLOUD_SDK_SUCCESS)))
+	.catch(error =>
+		NodeConsoleLogger.error(NodeTranslationService.getMessage(DOWNLOADING_SUITECLOUD_SDK_ERROR, fullURL, unwrapExceptionMessage(error)))
+	);
 }
 
 function downloadFile(url: string, sdkDirectory: string) {

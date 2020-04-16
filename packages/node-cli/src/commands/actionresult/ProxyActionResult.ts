@@ -36,7 +36,7 @@ export class ProxyActionResultBuilder extends ActionResultBuilder<null> {
 		return this;
 	}
 
-	withProxyOverridden(isProxyOverridden: boolean) {
+	withProxyOverridden(isProxyOverridden: boolean = false) {
 		this.isProxyOverridden = isProxyOverridden;
 		return this;
 	}

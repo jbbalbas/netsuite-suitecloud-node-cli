@@ -11,13 +11,13 @@ type DeployData = string[];
 
 export interface DeployActionResult extends ActionResult<DeployData> {
 	isServerValidation: boolean;
-	appliedContentProtection: string;
+	appliedContentProtection: boolean;
 	projectType: string;
 }
 
 export class DeployActionResultBuilder extends ActionResultBuilder<DeployData> {
 	isServerValidation: boolean = false;
-	appliedContentProtection: string = SDK_FALSE;
+	appliedContentProtection: boolean = false;
 	projectType!: string;
 
 	constructor() {
@@ -29,7 +29,7 @@ export class DeployActionResultBuilder extends ActionResultBuilder<DeployData> {
 		return this;
 	}
 
-	withAppliedContentProtection(appliedContentProtection: string) {
+	withAppliedContentProtection(appliedContentProtection: boolean) {
 		this.appliedContentProtection = appliedContentProtection;
 		return this;
 	}

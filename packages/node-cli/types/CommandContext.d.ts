@@ -25,5 +25,6 @@ export type SDKExecutionContextOptions = {
 	includeProjectDefaultAuthId?: boolean;
 	developmentMode?: boolean;
 	params?: {[x: string]: any};
-	flags?: string[];
+    flags?: string[];
+    requiresContextParams?: boolean;
 }

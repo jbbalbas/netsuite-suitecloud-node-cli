@@ -5,7 +5,7 @@
 'use strict';
 
 import * as FileUtils from '../../utils/FileUtils';
-import NodeTranslationService from '../../services/NodeTranslationService';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 import { ERRORS } from '../../services/TranslationKeys';
 import { FILES } from '../../ApplicationConstants';
 import assert from 'assert';

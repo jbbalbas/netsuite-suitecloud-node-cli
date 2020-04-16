@@ -4,7 +4,7 @@
 */
 'use strict';
 
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { COMMAND_OPTION_IS_MANDATORY } from '../services/TranslationKeys';
 import assert from 'assert';
 import { SKDCommandOption, NodeCommandOption } from '../../types/Metadata';

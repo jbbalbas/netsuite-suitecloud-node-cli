@@ -10,15 +10,18 @@ import BaseCommandGenerator from './BaseCommandGenerator';
 import { executeWithSpinner } from '../ui/CliSpinner';
 import * as CommandUtils from '../utils/CommandUtils';
 import SDKExecutionContext from '../SDKExecutionContext';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { COMMAND_SDK_WRAPPER } from '../services/TranslationKeys';
 import { SKDWrapperCommandAnswer } from "../../types/CommandAnswers";
+import { ActionResultBuilder } from "./actionresult/ActionResult";
 
 const FLAG_OPTION_TYPE = 'FLAG';
 const PROJECT_DIRECTORY_OPTION = 'projectdirectory';
 const PROJECT_OPTION = 'project';
 
 export default class SDKWrapperCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, SKDWrapperCommandAnswer> {
+	protected actionResultBuilder = new ActionResultBuilder();
+
 	constructor(options: BaseCommandParameters) {
 		super(options);
 	}

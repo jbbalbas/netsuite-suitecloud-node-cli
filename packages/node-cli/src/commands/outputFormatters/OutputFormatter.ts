@@ -10,7 +10,7 @@ import ConsoleLogger from '../../loggers/ConsoleLogger';
 import { ActionResult } from '../actionresult/ActionResult';
 import CLIException from '../../CLIException';
 
-export default abstract class OutputFormatter {
+export default class OutputFormatter {
 
 	protected consoleLogger: ConsoleLogger;
 
@@ -18,7 +18,7 @@ export default abstract class OutputFormatter {
 		this.consoleLogger = consoleLogger;
 	}
 
-	public abstract formatActionResult(actionResult: ActionResult<any>): void;
+	public formatActionResult(actionResult: ActionResult<any>) {};
 
 	public formatError(error: string | CLIException): string {
 		let errorMessage = unwrapExceptionMessage(error);

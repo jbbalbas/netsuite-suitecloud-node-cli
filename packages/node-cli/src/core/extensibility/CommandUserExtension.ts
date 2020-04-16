@@ -5,7 +5,7 @@
 'use strict';
 
 import assert from 'assert';
-import NodeTranslationService from '../../services/NodeTranslationService';
+import { NodeTranslationService } from '../../services/NodeTranslationService';
 import { lineBreak } from '../../loggers/LoggerConstants';
 import { ERRORS } from '../../services/TranslationKeys';
 import { OperationResult } from '../../../types/OperationResult';

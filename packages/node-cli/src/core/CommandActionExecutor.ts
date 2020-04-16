@@ -4,28 +4,25 @@
  */
 'use strict';
 
-import ActionResultUtils from '../utils/ActionResultUtils';
-import { ActionResult } from '../commands/actionresult/ActionResult';
-
 import assert from 'assert';
 import inquirer from 'inquirer';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { ERRORS } from '../services/TranslationKeys';
 import { throwValidationException } from '../utils/ExceptionUtils';
-import OperationResultStatus from '../commands/OperationResultStatus';
-import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import CLIConfigurationService from './extensibility/CLIConfigurationService';
 import CommandsMetadataService from './CommandsMetadataService';
 import AuthenticationService from './authentication/AuthenticationService';
 import CommandInstanceFactory from './CommandInstanceFactory';
 import CommandOptionsValidator from './CommandOptionsValidator';
-import CommandOutputHandler from './CommandOutputHandler';
 import { ActionContext } from '../../types/CommandContext';
 import { InteractiveCommandInfo, NonInteractiveCommandInfo, SKDCommandOption, NodeCommandOption } from '../../types/Metadata';
 import Command from '../commands/Command';
 import CommandUserExtension from './extensibility/CommandUserExtension';
 import { OperationResult } from '../../types/OperationResult';
 import OutputFormatter from '../commands/outputFormatters/OutputFormatter';
+import ConsoleLogger from '../loggers/ConsoleLogger';
+import { STATUS, ActionResultBuilder } from '../commands/actionresult/ActionResult';
+import * as ActionResultUtils from '../utils/ActionResultUtils';
 
 
 type Depenendencies = {
@@ -34,8 +31,8 @@ type Depenendencies = {
 	cliConfigurationService: CLIConfigurationService;
 	commandInstanceFactory: CommandInstanceFactory;
 	commandsMetadataService: CommandsMetadataService;
-	commandOutputHandler: CommandOutputHandler;
 	authenticationService: AuthenticationService;
+	consoleLogger: ConsoleLogger;
 }
 
 export default class CommandActionExecutor {
@@ -45,8 +42,8 @@ export default class CommandActionExecutor {
 	private cliConfigurationService: CLIConfigurationService
 	private commandInstanceFactory: CommandInstanceFactory;
 	private commandsMetadataService: CommandsMetadataService;
-	private commandOutputHandler: CommandOutputHandler;
 	private authenticationService: AuthenticationService;
+	private consoleLogger: ConsoleLogger;
 
 	constructor(dependencies: Depenendencies) {
 		assert(dependencies);
@@ -107,11 +104,7 @@ export default class CommandActionExecutor {
 				projectConfiguration: projectConfiguration,
 			});
 
-			if (!(actionResult instanceof ActionResult)) {
-				throw 'INTERNAL ERROR: Command must return an ActionResult object.';
-			}
-
-			if (actionResult.status === ActionResult.STATUS.ERROR) {
+			if (actionResult.status === STATUS.ERROR) {
 				const error = ActionResultUtils.getErrorMessagesString(actionResult);
 				throw error;
 			}
@@ -128,7 +121,7 @@ export default class CommandActionExecutor {
 			if (commandUserExtension && commandUserExtension.onError) {
 				commandUserExtension.onError(error);
 			}
-			return ActionResult.Builder.withErrors(errorMessage);
+			return new ActionResultBuilder().withErrors([errorMessage]);
 		}
 	}
 

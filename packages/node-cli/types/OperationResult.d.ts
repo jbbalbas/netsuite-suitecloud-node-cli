@@ -3,6 +3,7 @@ export interface OperationResult {
 	errorMessages: string;
 	errorCode: string;
 	status: string;
+	data?: any;
 }
 
 export interface ProxyOperationResult extends OperationResult {

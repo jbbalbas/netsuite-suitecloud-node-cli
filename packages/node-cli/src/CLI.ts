@@ -7,15 +7,15 @@
 import path from 'path';
 import assert from 'assert';
 import program from 'commander';
-import * as NodeConsoleLogger from './loggers/NodeConsoleLogger';
-import NodeTranslationService from './services/NodeTranslationService';
+import { NodeConsoleLogger } from './loggers/NodeConsoleLogger';
+import { NodeTranslationService } from './services/NodeTranslationService';
 import * as Keys from './services/TranslationKeys';
 import { unwrapExceptionMessage } from './utils/ExceptionUtils';
 const INTERACTIVE_ALIAS = '-i';
 const INTERACTIVE_OPTION = '--interactive';
 
 // suitecloud executable is in {root}/src/suitecloud.js. package.json file is one level before
-const PACKAGE_FILE = `${path.dirname(require.main.filename)}/../package.json`;
+const PACKAGE_FILE = `${path.dirname(require.main?.filename || '.')}/../package.json`;
 const configFile = require(PACKAGE_FILE);
 const CLI_VERSION = configFile ? configFile.version : 'unknown';
 const COMPATIBLE_NS_VERSION = '2020.1';

@@ -6,12 +6,12 @@
 
 import assert from 'assert';
 
-export const INQUIRER_TYPES = {
-	CHECKBOX: 'checkbox',
-	INPUT: 'input',
-	LIST: 'list',
-	PASSWORD: 'password',
-	PASSWORD_MASK: '*'
+export enum INQUIRER_TYPES {
+	CHECKBOX = 'checkbox',
+	INPUT = 'input',
+	LIST = 'list',
+	PASSWORD = 'password',
+	PASSWORD_MASK = '*'
 }
 
 export function extractKeysFromObject(object: { [x: string]: any }, keys: string[]) {

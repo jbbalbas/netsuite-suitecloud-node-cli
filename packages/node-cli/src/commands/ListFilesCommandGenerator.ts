@@ -4,30 +4,28 @@
  */
 'use strict';
 
-import { ActionResult } from '../commands/actionresult/ActionResult';
-import BaseCommandGenerator from './BaseCommandGenerator';
-
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
 import SDKExecutionContext from '../SDKExecutionContext';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { executeWithSpinner } from '../ui/CliSpinner';
-import * as NodeUtils from '../utils/NodeUtils';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import { COMMAND_LISTFILES } from '../services/TranslationKeys';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { ListFilesCommandAnswer } from '../../types/CommandAnswers';
-import { ListFilesOperationResult } from '../../types/OperationResult';
 import { Prompt } from '../../types/Prompt';
 import ListFilesOutputFormatter from './outputFormatters/ListFilesOutputFormatter';
+import { ActionResultBuilder } from './actionresult/ActionResult';
 
 const LIST_FOLDERS_COMMAND = 'listfolders';
 const SUITE_SCRIPTS_FOLDER = '/SuiteScripts';
 
 export default class ListFilesCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, ListFilesCommandAnswer> {
+	protected actionResultBuilder = new ActionResultBuilder();
+	
 	constructor(options: BaseCommandParameters) {
 		super(options);
-		this._outputFormatter = new ListFilesOutputFormatter(options.consoleLogger);
+		this.outputFormatter = new ListFilesOutputFormatter(options.consoleLogger);
 	}
 
 	public async _getCommandQuestions(prompt: Prompt<ListFilesCommandAnswer>) {
@@ -44,7 +42,7 @@ export default class ListFilesCommandGenerator extends BaseCommandGenerator<Base
 			{
 				type: CommandUtils.INQUIRER_TYPES.LIST,
 				name: this.commandMetadata.options.folder.name,
-				message: TranslationService.getMessage(COMMAND_LISTFILES.SELECT_FOLDER),
+				message: NodeTranslationService.getMessage(COMMAND_LISTFILES.SELECT_FOLDER),
 				default: SUITE_SCRIPTS_FOLDER,
 				choices: this.getFileCabinetFolders(operationResult)
 			}
@@ -77,12 +75,12 @@ export default class ListFilesCommandGenerator extends BaseCommandGenerator<Base
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? ActionResult.Builder.withData(operationResult.data)
+				? this.actionResultBuilder.withData(operationResult.data)
 						.withResultMessage(operationResult.resultMessage)
 						.build()
-				: ActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return ActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

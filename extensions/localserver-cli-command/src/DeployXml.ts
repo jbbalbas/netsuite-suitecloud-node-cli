@@ -22,7 +22,7 @@ export default class DeployXml {
 
 		this.deploy = Utils.parseXml(this.projectFolder, 'deploy.xml').deploy;
 
-		const { manifest } = Utils.parseXml(this._projectFolder, 'manifest.xml');
+		const { manifest } = Utils.parseXml(this.projectFolder, 'manifest.xml');
 		const isACP = manifest.$.projecttype === 'ACCOUNTCUSTOMIZATION';
 
 		let objectsPath = this.deploy.objects.path;

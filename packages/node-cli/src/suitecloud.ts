@@ -14,7 +14,7 @@ import CommandOptionsValidator from './core/CommandOptionsValidator';
 import CLIConfigurationService from './core/extensibility/CLIConfigurationService';
 import AuthenticationService from './core/authentication/AuthenticationService';
 import path from 'path';
-import NodeConsoleLogger from './loggers/NodeConsoleLogger';
+import { NodeConsoleLogger } from './loggers/NodeConsoleLogger';
 
 const executionPath = process.cwd();
 const rootCLIPath = path.dirname(require.main ? require.main.filename : '.');

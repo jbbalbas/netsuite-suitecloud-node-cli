@@ -4,16 +4,12 @@
  */
 'use strict';
 
-import { ActionResult } from '../commands/actionresult/ActionResult';
-import ActionResultUtils from '../utils/ActionResultUtils';
-
 import inquirer from 'inquirer';
 import BaseCommandGenerator from './BaseCommandGenerator';
 import * as CommandUtils from '../utils/CommandUtils';
-import * as NodeUtils from '../utils/NodeUtils';
 import OBJECT_TYPES from '../metadata/ObjectTypesMetadata';
 import ProjectInfoService from '../services/ProjectInfoService';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import FileSystemService from '../services/FileSystemService';
 import { join } from 'path';
 import CommandsMetadataService from '../core/CommandsMetadataService';
@@ -29,6 +25,8 @@ import { ImportObjectsOperationResult, ListObjectsOperationResult } from '../../
 import { Prompt, PromptParameters } from '../../types/Prompt';
 import { InteractiveCommandInfo, NonInteractiveCommandInfo } from '../../types/Metadata';
 import ImportObjectsOutputFormatter from './outputFormatters/ImportObjectsOutputFormatter';
+import { ActionResultBuilder } from './actionresult/ActionResult';
+import { lineBreak } from '../loggers/LoggerConstants';
 
 
 const ANSWERS_NAMES = {
@@ -58,6 +56,7 @@ export default class ImportObjectsCommandGenerator extends BaseCommandGenerator<
 	private projectInfoService: ProjectInfoService;
 	private listObjectsMetadata: InteractiveCommandInfo | NonInteractiveCommandInfo;
 	private fileSystemService: FileSystemService;
+	protected actionResultBuilder = new ActionResultBuilder();
 
 	constructor(options: BaseCommandParameters) {
 		super(options);
@@ -86,7 +85,7 @@ export default class ImportObjectsCommandGenerator extends BaseCommandGenerator<
 				message: NodeTranslationService.getMessage(COMMAND_IMPORTOBJECTS.MESSAGES.LOADING_OBJECTS),
 			});
 		} catch (error) {
-			throw NodeTranslationService.getMessage(COMMAND_IMPORTOBJECTS.ERRORS.CALLING_LIST_OBJECTS, NodeUtils.lineBreak, error);
+			throw NodeTranslationService.getMessage(COMMAND_IMPORTOBJECTS.ERRORS.CALLING_LIST_OBJECTS, lineBreak, error);
 		}
 
 		if (listObjectsResult.status === SDKOperationResultUtils.STATUS.ERROR) {
@@ -111,7 +110,7 @@ export default class ImportObjectsCommandGenerator extends BaseCommandGenerator<
 			const overwriteConfirmationQuestion = this.generateOverwriteConfirmationQuestion(answersAfterObjectSelection);
 			overwriteConfirmationAnswer = await prompt(overwriteConfirmationQuestion);
 		} catch (error) {
-			throw NodeTranslationService.getMessage(ERRORS.PROMPTING_INTERACTIVE_QUESTIONS_FAILED, NodeUtils.lineBreak, error);
+			throw NodeTranslationService.getMessage(ERRORS.PROMPTING_INTERACTIVE_QUESTIONS_FAILED, lineBreak, error);
 		}
 
 		const combinedAnswers = { ...listObjectAnswers, ...selectionObjectAnswers, ...answersAfterObjectSelection, ...overwriteConfirmationAnswer };
@@ -305,7 +304,7 @@ export default class ImportObjectsCommandGenerator extends BaseCommandGenerator<
 		return answers;
 	}
 
-	public executeAction(answers: ImportObjectsCommandAnswers) {
+	public async executeAction(answers: ImportObjectsCommandAnswers) {
 		if (answers.overwrite_objects === false) {
 			throw NodeTranslationService.getMessage(COMMAND_IMPORTOBJECTS.MESSAGES.CANCEL_IMPORT);
 		}
@@ -324,13 +323,13 @@ export default class ImportObjectsCommandGenerator extends BaseCommandGenerator<
 				}
 			}
 
-		const params = CommandUtils.extractCommandOptions(answers, this.commandMetadata);
-		const executionContextForImportObjects = new SDKExecutionContext({
-			command: this.commandMetadata.sdkCommand,
-			params,
-			flags,
-			includeProjectDefaultAuthId: true
-		});
+			const params = CommandUtils.extractCommandOptions(answers, this.commandMetadata);
+			const executionContextForImportObjects = new SDKExecutionContext({
+				command: this.commandMetadata.sdkCommand,
+				params,
+				flags,
+				includeProjectDefaultAuthId: true
+			});
 
 			const operationResult = await executeWithSpinner({
 				action: this.sdkExecutor.execute(executionContextForImportObjects),
@@ -338,10 +337,10 @@ export default class ImportObjectsCommandGenerator extends BaseCommandGenerator<
 			});
 
 			return operationResult.status === SDKOperationResultUtils.STATUS.SUCCESS
-				? ActionResult.Builder.withData(operationResult.data).withResultMessage(operationResult.resultMessage).build()
-				: ActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+				? this.actionResultBuilder.withData(operationResult.data).withResultMessage(operationResult.resultMessage).build()
+				: this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 		} catch (error) {
-			return ActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 };

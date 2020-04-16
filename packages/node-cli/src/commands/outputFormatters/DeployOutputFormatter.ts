@@ -7,7 +7,7 @@ import OutputFormatter from './OutputFormatter';
 import { NodeTranslationService } from '../../services/NodeTranslationService';
 import * as ActionResultUtils from '../../utils/ActionResultUtils';
 
-import { PROJECT_SUITEAPP, SDK_TRUE } from '../../ApplicationConstants';
+import { PROJECT_SUITEAPP } from '../../ApplicationConstants';
 
 import { COMMAND_DEPLOY } from '../../services/TranslationKeys';
 import ConsoleLogger from '../../loggers/ConsoleLogger';
@@ -36,9 +36,9 @@ export default class DeployOutputFormatter extends OutputFormatter {
 		}
 	}
 
-	private showApplyContentProtectionOptionMessage(projectType: string, isApplyContentProtection: string, projectFolder: string) {
+	private showApplyContentProtectionOptionMessage(projectType: string, isApplyContentProtection: boolean, projectFolder: string) {
 		if (projectType === PROJECT_SUITEAPP) {
-			if (isApplyContentProtection === SDK_TRUE) {
+			if (isApplyContentProtection === true) {
 				this.consoleLogger.info(NodeTranslationService.getMessage(COMMAND_DEPLOY.MESSAGES.APPLYING_CONTENT_PROTECTION, projectFolder));
 			} else {
 				this.consoleLogger.info(NodeTranslationService.getMessage(COMMAND_DEPLOY.MESSAGES.NOT_APPLYING_CONTENT_PROTECTION, projectFolder));

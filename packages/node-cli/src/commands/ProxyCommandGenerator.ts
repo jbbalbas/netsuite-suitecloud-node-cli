@@ -4,19 +4,20 @@
  */
 'use strict';
 
-import ProxyActionResult from '../commands/actionresult/ProxyActionResult';
+import { ProxyActionResultBuilder } from '../commands/actionresult/ProxyActionResult';
 import BaseCommandGenerator from './BaseCommandGenerator';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import { COMMAND_PROXY } from '../services/TranslationKeys';
 import CLISettingsService from '../services/settings/CLISettingsService';
 import url from 'url';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { ProxyCommandAnswer } from '../../types/CommandAnswers';
-import { ProxyOperationResult } from '../../types/OperationResult';
 import ProxyOutputFormatter from './outputFormatters/ProxyOutputFormatter';
 
 export default class ProxyCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, ProxyCommandAnswer> {
 	private CLISettingsService: CLISettingsService
+	protected actionResultBuilder = new ProxyActionResultBuilder();
+
 	constructor(options: BaseCommandParameters) {
 		super(options);
 		this.CLISettingsService = new CLISettingsService();
@@ -25,13 +26,13 @@ export default class ProxyCommandGenerator extends BaseCommandGenerator<BaseComm
 
 	public async executeAction(args: ProxyCommandAnswer) {
 		try {
-			const proxyUrlArgument = args.set;
+			const proxyUrlArgument = args.set || '';
 			const shouldClearArgument = args.clear;
 
 			this.validateArguments(proxyUrlArgument, shouldClearArgument);
 			const isSettingProxy = !!proxyUrlArgument;
 
-			const proxyCommandAction : ProxyCommandAnswer= {
+			const proxyCommandAction : ProxyCommandAnswer = {
 				isSettingProxy: isSettingProxy,
 				proxyUrl: proxyUrlArgument,
 			};
@@ -44,13 +45,13 @@ export default class ProxyCommandGenerator extends BaseCommandGenerator<BaseComm
 			}
 
 			const proxyCommandData = await Promise.resolve(proxyCommandAction);
-			return ProxyActionResult.Builder.success()
+			return this.actionResultBuilder.success()
 				.withProxySetOption(proxyCommandData.isSettingProxy)
 				.withProxyUrl(proxyCommandData.proxyUrl)
 				.withProxyOverridden(proxyCommandData.isProxyOverridden)
 				.build();
 		} catch (error) {
-			return ProxyActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 

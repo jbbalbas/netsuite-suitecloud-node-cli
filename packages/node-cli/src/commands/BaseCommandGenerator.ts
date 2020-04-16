@@ -8,22 +8,26 @@ import SDKExecutor from '../SDKExecutor';
 import Command from './Command';
 import assert from 'assert';
 import AuthenticationService from '../core/authentication/AuthenticationService';
-import NodeConsoleLogger from '../loggers/NodeConsoleLogger';
+import { NodeConsoleLogger } from '../loggers/NodeConsoleLogger';
 import OutputFormatter from './outputFormatters/OutputFormatter';
 import { BaseCommandParameters } from '../../types/CommandOptions';
 import { Prompt } from '../../types/Prompt';
 import { OperationResult } from '../../types/OperationResult';
 import { BaseCommandAnswer } from '../../types/CommandAnswers';
 import { InteractiveCommandInfo, NonInteractiveCommandInfo } from '../../types/Metadata';
-import { ActionResult } from './actionresult/ActionResult';
+import { ActionResult, ActionResultBuilder } from './actionresult/ActionResult';
+import ConsoleLogger from '../loggers/ConsoleLogger';
 
-export default class BaseCommandGenerator<Parameters extends BaseCommandParameters, Answer extends BaseCommandAnswer> {
+export default abstract class BaseCommandGenerator<Parameters extends BaseCommandParameters, Answer extends BaseCommandAnswer> {
 	public sdkExecutor: SDKExecutor;
 	public commandMetadata: InteractiveCommandInfo | NonInteractiveCommandInfo;
 	public projectFolder: string;
 	public executionPath: string;
 	public runInInteractiveMode?: boolean;
 	public formatOutputFunc?: (x: OperationResult) => void;
+	public outputFormatter: OutputFormatter;
+	public consoleLogger: ConsoleLogger;
+	protected abstract actionResultBuilder: ActionResultBuilder<any>;
 
 	constructor(options: Parameters) {
 		assert(options);
@@ -46,13 +50,13 @@ export default class BaseCommandGenerator<Parameters extends BaseCommandParamete
 		return prompt([]);
 	}
 
-	public executeAction(x: Answer) { }
+	public abstract executeAction(x: Answer): Promise<ActionResult<any>>
 
 	public preExecuteAction(args: Answer) {
 		return args;
 	}
 
-	public formatOutput(x: ActionResult) {}
+	public formatOutput(x: ActionResult<any>) {}
 
 	public create() {
 		return new Command({
@@ -64,13 +68,5 @@ export default class BaseCommandGenerator<Parameters extends BaseCommandParamete
 			outputFormatter: this.outputFormatter ? this.outputFormatter : new OutputFormatter(this.consoleLogger),
 			consoleLogger: this.consoleLogger ? this.consoleLogger : NodeConsoleLogger,			
 		});
-	}
-
-	get consoleLogger() {
-		return this._consoleLogger;
-	}
-
-	get outputFormatter() {
-		return this._outputFormatter;
 	}
 };

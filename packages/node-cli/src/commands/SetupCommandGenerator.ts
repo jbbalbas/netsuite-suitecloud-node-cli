@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import SetupActionResult from '../commands/actionresult/SetupActionResult';
+import { SetupActionResultBuilder } from '../commands/actionresult/SetupActionResult';
 import chalk from 'chalk';
 import path from 'path';
 import BaseCommandGenerator from './BaseCommandGenerator';
@@ -13,9 +13,8 @@ import { executeWithSpinner } from '../ui/CliSpinner';
 import * as SDKOperationResultUtils from '../utils/SDKOperationResultUtils';
 import * as FileUtils from '../utils/FileUtils';
 import * as CommandUtils from '../utils/CommandUtils';
-import NodeTranslationService from '../services/NodeTranslationService';
+import { NodeTranslationService } from '../services/NodeTranslationService';
 import AuthenticationService from './../core/authentication/AuthenticationService';
-import OperationResultStatus from './OperationResultStatus';
 import inquirer from 'inquirer';
 import { FILES } from '../ApplicationConstants';
 import { COMMAND_SETUPACCOUNT } from '../services/TranslationKeys';
@@ -64,6 +63,7 @@ const FLAGS = {
 const CREATE_NEW_AUTH = '******CREATE_NEW_AUTH*******!£$%&*';
 export default class SetupCommandGenerator extends BaseCommandGenerator<BaseCommandParameters, SetupCommandAnswer> {
 	private authenticationService: AuthenticationService
+	protected actionResultBuilder = new SetupActionResultBuilder();
 	constructor(options: BaseCommandParameters) {
 		super(options);
 		this.authenticationService = new AuthenticationService(options.executionPath);
@@ -258,9 +258,9 @@ export default class SetupCommandGenerator extends BaseCommandGenerator<BaseComm
 					commandParams.url = executeActionContext.url;
 				}
 
-				const operationResult = await this._performBrowserBasedAuthentication(commandParams, executeActionContext.developmentMode);
+				const operationResult = await this.performBrowserBasedAuthentication(commandParams, executeActionContext.developmentMode);
 				if (operationResult.status === SDKOperationResultUtils.STATUS.ERROR) {
-					return SetupActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+					return this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 				}
 				authId = executeActionContext.newAuthId;
 				accountInfo = operationResult.data.accountInfo;
@@ -273,21 +273,21 @@ export default class SetupCommandGenerator extends BaseCommandGenerator<BaseComm
 				};
 
 
-				const operationResult = await this._saveToken(commandParams, executeActionContext.developmentMode);
+				const operationResult = await this.saveToken(commandParams, executeActionContext.developmentMode);
 				if (operationResult.status === SDKOperationResultUtils.STATUS.ERROR) {
-					return SetupActionResult.Builder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
+					return this.actionResultBuilder.withErrors(SDKOperationResultUtils.collectErrorMessages(operationResult)).build();
 				}
 				authId = executeActionContext.newAuthId;
 				accountInfo = operationResult.data.accountInfo;
 			} else if (executeActionContext.mode === AUTH_MODE.REUSE) {
-				authId = executeActionContext.authentication.authId;
-				accountInfo = executeActionContext.authentication.accountInfo;
+				authId = executeActionContext.authentication?.authId;
+				accountInfo = executeActionContext.authentication?.accountInfo;
 			}
-			this._authenticationService.setDefaultAuthentication(authId);
+			this.authenticationService.setDefaultAuthentication(authId);
 
-			return SetupActionResult.Builder.success().withMode(executeActionContext.mode).withAuthId(authId).withAccountInfo(accountInfo).build();
+			return this.actionResultBuilder.success().withMode(executeActionContext.mode).withAuthId(authId).withAccountInfo(accountInfo).build();
 		} catch (error) {
-			return SetupActionResult.Builder.withErrors([error]).build();
+			return this.actionResultBuilder.withErrors([error]).build();
 		}
 	}
 
