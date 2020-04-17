@@ -46,14 +46,14 @@ export default class CommandActionExecutor {
 	private consoleLogger: ConsoleLogger;
 
 	constructor(dependencies: Depenendencies) {
-		assert(dependencies);
-		assert(dependencies.executionPath);
-		assert(dependencies.commandOptionsValidator);
-		assert(dependencies.cliConfigurationService);
-		assert(dependencies.commandInstanceFactory);
-		assert(dependencies.commandsMetadataService);
-		assert(dependencies.authenticationService);
-		assert(dependencies.consoleLogger);
+		assert(dependencies, 'dependencies are mandatory');
+		assert(dependencies.executionPath, 'dependencies must include executionPath property');
+		assert(dependencies.commandOptionsValidator, 'dependencies must include commandOptionsValidator property');
+		assert(dependencies.cliConfigurationService, 'dependencies must include cliConfigurationService property');
+		assert(dependencies.commandInstanceFactory, 'dependencies must include commandInstanceFactory property');
+		assert(dependencies.commandsMetadataService, 'dependencies must include commandsMetadataService property');
+		assert(dependencies.authenticationService, 'dependencies must include authenticationService property');
+		assert(dependencies.consoleLogger, 'dependencies must include consoleLogger property');
 
 		this.executionPath = dependencies.executionPath;
 		this.commandOptionsValidator = dependencies.commandOptionsValidator;
@@ -65,10 +65,10 @@ export default class CommandActionExecutor {
 	}
 
 	public async executeAction(context: ActionContext) {
-		assert(context);
-		assert(context.arguments);
-		assert(context.commandName);
-		assert(typeof context.runInInteractiveMode === 'boolean');
+		assert(context, 'context is mandatory');
+		assert(context.arguments, 'context must include arguments property');
+		assert(context.commandName, 'context must include commandName property');
+		assert(typeof context.runInInteractiveMode === 'boolean', 'context property runInInteractiveMode must be a boolean');
 
 		let commandUserExtension;
 		try {

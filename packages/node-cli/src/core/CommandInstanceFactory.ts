@@ -19,12 +19,12 @@ export default class CommandInstanceFactory {
 		runInInteractiveMode: boolean;
 		consoleLogger: ConsoleLogger;
 	}) {
-		assert(options);
-		assert(options.commandMetadata);
-		assert(options.projectFolder);
-		assert(options.executionPath);
-		assert(typeof options.runInInteractiveMode === 'boolean');
-		assert(options.consoleLogger);
+		assert(options, 'options are mandatory');
+		assert(options.commandMetadata, 'options must include commandMetadata property');
+		assert(options.projectFolder, 'options must include projectFolder property');
+		assert(options.executionPath, 'options must include executionPath property');
+		assert(typeof options.runInInteractiveMode === 'boolean', 'options property runInInteractiveMode must be a boolean');
+		assert(options.consoleLogger, 'options must include consoleLogger property');
 
 		const commandMetadata = options.commandMetadata;
 		const commandGeneratorPath = options.runInInteractiveMode

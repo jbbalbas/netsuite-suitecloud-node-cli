@@ -13,9 +13,9 @@ export default class CommandOptionsValidator {
 	validate(options: { commandOptions: {
 		[x: string]: SKDCommandOption | NodeCommandOption;
 	}, arguments: { [x: string]: string }; }) {
-		assert(options);
-		assert(options.commandOptions);
-		assert(options.arguments);
+		assert(options, 'options are mandatory');
+		assert(options.commandOptions, 'options must include commandOptions property');
+		assert(options.arguments, 'options must include arguments property');
 
 		const validationErrors = [];
 		const isMandatoryOptionPresent = (optionId: string, aliasId: string, args: { [x: string]: string }) => {

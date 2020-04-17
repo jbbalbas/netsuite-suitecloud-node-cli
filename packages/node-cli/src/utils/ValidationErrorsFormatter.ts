@@ -10,8 +10,8 @@ import { lineBreak } from '../loggers/LoggerConstants';
 import assert from 'assert';
 
 export function formatErrors(validationErrors: (string | boolean | undefined)[]) {
-	assert(validationErrors);
-	assert(Array.isArray(validationErrors));
+	assert(validationErrors, 'validationErrors is mandatory');
+	assert(Array.isArray(validationErrors), 'validationErrors must be an Array');
 
 	const errorMessageHeader = NodeTranslationService.getMessage(
 		TRANSLATION_KEYS.COMMAND_OPTIONS_VALIDATION_ERRORS

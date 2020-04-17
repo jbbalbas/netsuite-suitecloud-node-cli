@@ -22,7 +22,7 @@ export default class ProjectInfoService {
 	private CACHED_PROJECT_TYPE?: string;
 
 	constructor(projectFolder: string) {
-		assert(projectFolder);
+		assert(projectFolder, 'projectFolder is mandatory');
 		this.CACHED_PROJECT_TYPE = undefined;
 		this.projectFolder = projectFolder;
 	}

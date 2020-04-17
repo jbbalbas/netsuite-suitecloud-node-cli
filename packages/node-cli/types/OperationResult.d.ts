@@ -1,6 +1,6 @@
 export interface OperationResult {
 	resultMessage: string;
-	errorMessages: string;
+	errorMessages: string[];
 	errorCode: string;
 	status: string;
 	data?: any;

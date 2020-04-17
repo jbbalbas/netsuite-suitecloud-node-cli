@@ -15,7 +15,7 @@ const INTERACTIVE_ALIAS = '-i';
 const INTERACTIVE_OPTION = '--interactive';
 
 // suitecloud executable is in {root}/src/suitecloud.js. package.json file is one level before
-const PACKAGE_FILE = `${path.dirname(require.main?.filename || '.')}/../package.json`;
+const PACKAGE_FILE = `${require.main ? path.dirname(require.main.filename) : ''}/../package.json`;
 const configFile = require(PACKAGE_FILE);
 const CLI_VERSION = configFile ? configFile.version : 'unknown';
 const COMPATIBLE_NS_VERSION = '2020.1';
@@ -26,10 +26,10 @@ export default class CLI {
 	private commandRegistrationService: any;
 
 	constructor(dependencies: {commandsMetadataService: any; commandActionExecutor: any; commandRegistrationService: any}) {
-		assert(dependencies);
-		assert(dependencies.commandsMetadataService);
-		assert(dependencies.commandActionExecutor);
-		assert(dependencies.commandRegistrationService);
+		assert(dependencies, 'dependencies are mandatory');
+		assert(dependencies.commandsMetadataService, 'dependencies must include commandsMetadataService property');
+		assert(dependencies.commandActionExecutor, 'dependencies must include commandActionExecutor property');
+		assert(dependencies.commandRegistrationService, 'dependencies must include commandRegistrationService property');
 
 		this.commandsMetadataService = dependencies.commandsMetadataService;
 		this.commandActionExecutor = dependencies.commandActionExecutor;

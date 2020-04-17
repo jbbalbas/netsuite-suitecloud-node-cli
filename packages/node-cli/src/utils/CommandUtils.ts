@@ -24,9 +24,9 @@ export function extractKeysFromObject(object: { [x: string]: any }, keys: string
 }
 
 export function extractCommandOptions(answers: { [x: string]: any }, commandMetadata: {options: { [x: string] : any}}) {
-	assert(answers);
-	assert(commandMetadata);
-	assert(commandMetadata.options);
+	assert(answers, 'answers is mandatory');
+	assert(commandMetadata), 'comandMetadata is mandatory';
+	assert(commandMetadata.options, 'commandMetadata must include options property');
 
 	const commandOptions = Object.keys(commandMetadata.options);
 	return extractKeysFromObject(answers, commandOptions);

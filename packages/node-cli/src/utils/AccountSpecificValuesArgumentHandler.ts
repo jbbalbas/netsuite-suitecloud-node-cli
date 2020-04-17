@@ -21,7 +21,7 @@ const ACCOUNT_SPECIFIC_VALUES_OPTIONS = {
 export default class AccountSpecificValuesArgumentHandler {
 	private projectInfoService: ProjectInfoService;
 	constructor(options: {projectInfoService: ProjectInfoService}) {
-		assert(options.projectInfoService);
+		assert(options.projectInfoService, 'options must include projectInfoService property');
 		this.projectInfoService = options.projectInfoService;
 	}
 

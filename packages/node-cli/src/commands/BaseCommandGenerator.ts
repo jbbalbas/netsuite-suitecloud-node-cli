@@ -30,11 +30,11 @@ export default abstract class BaseCommandGenerator<Parameters extends BaseComman
 	protected abstract actionResultBuilder: ActionResultBuilder<any>;
 
 	constructor(options: Parameters) {
-		assert(options);
-		assert(options.commandMetadata);
-		assert(options.projectFolder);
-		assert(typeof options.runInInteractiveMode === 'boolean');
-		assert(options.consoleLogger);
+		assert(options, 'options are mandatory');
+		assert(options.commandMetadata, 'options must include commandMetadata property');
+		assert(options.projectFolder, 'options must include projectFolder property');
+		assert(typeof options.runInInteractiveMode === 'boolean', 'options property runInInteractiveMode must be a boolean');
+		assert(options.consoleLogger, 'options must include consoleLogger property');
 
 		this.sdkExecutor = new SDKExecutor(new AuthenticationService(options.executionPath));
 

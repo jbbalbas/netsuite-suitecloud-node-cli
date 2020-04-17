@@ -3,7 +3,7 @@
  ** Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
  */
 'use strict';
-import { ActionResult, ActionResultBuilder } from './ActionResult';
+import { ActionResult, ActionResultBuilder, STATUS } from './ActionResult';
 import assert from 'assert';
 import { SDK_FALSE } from '../../ApplicationConstants';
 
@@ -63,7 +63,9 @@ export class ValidateActionResultBuilder extends ActionResultBuilder<ValidateDat
 
 	validate() {
 		super.validate();
-		assert(this.projectType, 'project type is required when creating a ValidateActionResult');
+		if (this.status === STATUS.SUCCESS) {
+			assert(this.projectType, 'project type is required when ValidateActionResult is success');
+		}
 	}
 
 	build(): ValidateActionResult {

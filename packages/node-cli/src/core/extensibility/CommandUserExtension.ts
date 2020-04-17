@@ -22,9 +22,9 @@ export default class CommandUserExtension<T extends OperationResult> {
 	}
 
 	public async beforeExecuting(options: any) {
-		assert(options);
-		assert(options.command);
-		assert(options.arguments);
+		assert(options, 'options are mandatory');
+		assert(options.command, 'options must include commandMetadata property');
+		assert(options.arguments, 'options must include commandMetadata property');
 
 		try {
 			if (!this.cliConfig.beforeExecuting) {

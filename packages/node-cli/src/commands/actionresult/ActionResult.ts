@@ -52,7 +52,6 @@ export class ActionResultBuilder<T> {
 	}
 
 	validate() {
-		assert(this);
 		assert(this.status, 'status is required when creating an ActionResult object.');
 		if (this.status === STATUS.SUCCESS) {
 			assert(this.data, 'data is required when ActionResult is a success.');

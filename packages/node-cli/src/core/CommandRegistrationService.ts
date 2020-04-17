@@ -20,11 +20,11 @@ export default class CommandRegistrationService {
 		executeCommandFunction: (x: any) => Promise<any>;
 		runInInteractiveMode: boolean;
 	}) {
-		assert(options);
-		assert(options.commandMetadata);
-		assert(options.program);
-		assert(options.executeCommandFunction);
-		assert(typeof options.runInInteractiveMode === 'boolean');
+		assert(options, 'options are mandatory');
+		assert(options.commandMetadata, 'options must include commandMetadata property');
+		assert(options.program, 'options must include program property');
+		assert(options.executeCommandFunction, 'options must include executeCommandFunction property');
+		assert(typeof options.runInInteractiveMode === 'boolean', 'options property runInInteractiveMode must be a boolean');
 
 		const commandMetadata = options.commandMetadata;
 		const program = options.program;

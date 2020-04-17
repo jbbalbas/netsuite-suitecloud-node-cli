@@ -17,7 +17,7 @@ export default class AuthenticationService {
 	private excutionPath: string;
 	private CACHED_DEFAULT_AUTH_ID: any;
 	constructor(executionPath: string) {
-		assert(executionPath);
+		assert(executionPath, 'executionPath is mandatory');
 		this.CACHED_DEFAULT_AUTH_ID = null;
 		this.excutionPath = executionPath;
 	}

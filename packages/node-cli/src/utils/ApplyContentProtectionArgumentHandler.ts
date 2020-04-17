@@ -18,8 +18,8 @@ export default class ApplyContentProtectionArgumentHandler {
 	private projectInfoService: ProjectInfoService;
 	private commandName: string;
 	constructor(options: {projectInfoService: ProjectInfoService, commandName: string}) {
-		assert(options.projectInfoService);
-		assert(options.commandName);
+		assert(options.projectInfoService, 'options must include projectInfoService property');
+		assert(options.commandName, 'options must include commandName property');
 		this.projectInfoService = options.projectInfoService;
 		this.commandName = options.commandName;
 	}

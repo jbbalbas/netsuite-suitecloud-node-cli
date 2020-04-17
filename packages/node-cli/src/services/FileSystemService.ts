@@ -16,7 +16,7 @@ const CHAR_ENCODING_UTF8 = 'utf-8';
 export default class FileSystemService {
 
 	public getFoldersFromDirectory(parentFolder: string) {
-		assert(parentFolder);
+		assert(parentFolder, 'parentFolder is mandatory');
 		const getDirectories = (source: string) =>
 			readdirSync(source)
 				.map(name => path.join(source, name))
@@ -28,7 +28,7 @@ export default class FileSystemService {
 	}
 
 	public getFoldersFromDirectoryRecursively(parentFolder: string) {
-		assert(parentFolder);
+		assert(parentFolder, 'parentFolder is mandatory');
 		const folders: string[] = [];
 		const getFoldersRecursively = (source: string) =>
 				this.getFoldersFromDirectory(source).forEach(folder => {
@@ -41,7 +41,7 @@ export default class FileSystemService {
 	}
 	
 	public getFilesFromDirectory(parentFolder: string) {
-		assert(parentFolder);
+		assert(parentFolder, 'parentFolder is mandatory');
 		const fullPathFiles: string[] = [];
 		const getFilesRecursively = (source: string) =>
 			readdirSync(source).forEach(file => {
@@ -64,10 +64,10 @@ export default class FileSystemService {
 		fileExtension: string;
 		bindings?: { id: string; value: string }[];
 	}) {
-		assert(options.template);
-		assert(options.destinationFolder);
-		assert(options.fileName);
-		assert(options.fileExtension);
+		assert(options.template, 'options must include template property');
+		assert(options.destinationFolder, 'options must include destinationFolder property');
+		assert(options.fileName, 'options must include fileName property');
+		assert(options.fileExtension, 'options must include fileExtension property');
 	
 		return new Promise((resolve, reject) => {
 			readFile(options.template, CHAR_ENCODING_UTF8, (readingError, content) => {
@@ -89,8 +89,8 @@ export default class FileSystemService {
 	}
 	
 	public createFolder(parentFolderPath: string, folderName: string) {
-		assert(parentFolderPath);
-		assert(folderName);
+		assert(parentFolderPath, 'parentFolderPath is mandatory');
+		assert(folderName, 'folderName is mandatory');
 	
 		let targetFolder = path.join(parentFolderPath, folderName);
 	
@@ -106,8 +106,8 @@ export default class FileSystemService {
 	}
 	
 	public renameFolder(oldPath: string, newPath: string) {
-		assert(oldPath);
-		assert(newPath);
+		assert(oldPath, 'oldPath is mandatory');
+		assert(newPath, 'newPath is mandatory');
 	
 		if (existsSync(oldPath) && oldPath !== newPath) {
 			renameSync(oldPath, newPath);
@@ -115,7 +115,7 @@ export default class FileSystemService {
 	}
 	
 	public deleteFolderRecursive(folderPath: string) {
-		assert(folderPath);
+		assert(folderPath, 'folderPath is mandatory');
 	
 		if (existsSync(folderPath)) {
 			readdirSync(folderPath).forEach(file => {
@@ -133,7 +133,7 @@ export default class FileSystemService {
 	}
 
 	public emptyFolderRecursive(folderPath: string) {
-		assert(folderPath);
+		assert(folderPath, 'folderPath is mandatory');
 		if (existsSync(folderPath)) {
 			readdirSync(folderPath).forEach(file => {
 				let currentPath = path.join(folderPath, file);
@@ -147,9 +147,9 @@ export default class FileSystemService {
 	}
 	
 	public replaceStringInFile(filePath: string, fromString: string, toString: string) {
-		assert(filePath);
-		assert(fromString);
-		assert(toString);
+		assert(filePath, 'filePath is mandatory');
+		assert(fromString, 'fromString is mandatory');
+		assert(toString, 'toString is mandatory');
 	
 		return new Promise((resolve, reject) => {
 			readFile(filePath, CHAR_ENCODING_UTF8, (readingError, content) => {
@@ -171,12 +171,12 @@ export default class FileSystemService {
 	}
 	
 	public folderExists(path: string) {
-		assert(path);
+		assert(path, 'path is mandatory');
 		return existsSync(path);
 	}
 	
 	public isFolderEmpty(path: string) {
-		assert(path);
+		assert(path, 'path is mandatory');
 		return readdirSync(path).length === 0;
 	}
 	
