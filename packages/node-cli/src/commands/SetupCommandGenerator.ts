@@ -82,6 +82,7 @@ export default class SetupCommandGenerator extends BaseCommandGenerator<BaseComm
 			action: this.sdkExecutor.execute(getAuthListContext),
 			message: NodeTranslationService.getMessage(COMMAND_SETUPACCOUNT.MESSAGES.GETTING_AVAILABLE_AUTHIDS),
 		});
+		console.log(JSON.stringify(existingAuthIDsResponse));
 
 		if (existingAuthIDsResponse.status === SDKOperationResultUtils.STATUS.ERROR) {
 			throw SDKOperationResultUtils.getResultMessage(existingAuthIDsResponse);

@@ -4,6 +4,7 @@
  */
 'use strict';
 import { ActionResult, ActionResultBuilder, STATUS } from './ActionResult';
+import assert from 'assert';
 
 export interface ProxyActionResult extends ActionResult<null> {
 	isSettingProxy: boolean;
@@ -42,7 +43,15 @@ export class ProxyActionResultBuilder extends ActionResultBuilder<null> {
 	}
 
 	validate() {
-		super.validate();
+		assert(this.status, 'status is required when creating an ActionResult object.');
+		if (this.status === STATUS.SUCCESS) {
+			assert(typeof this.isSettingProxy === 'boolean', 'isSettingProxy is required when ActionResult is a success.');
+			assert(typeof this.isProxyOverridden === 'boolean', 'isProxyOverridden is required when ActionResult is a success.');
+		}
+		if (this.status === STATUS.ERROR) {
+			assert(this.errorMessages, 'errorMessages is required when ActionResult is an error.');
+			assert(Array.isArray(this.errorMessages), 'errorMessages argument must be an array');
+		}
 	}
 
 	build(): ProxyActionResult {

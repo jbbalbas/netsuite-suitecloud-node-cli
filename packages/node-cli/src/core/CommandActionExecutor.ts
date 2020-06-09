@@ -85,6 +85,7 @@ export default class CommandActionExecutor {
 			const projectConfiguration = commandMetadata.isSetupRequired ? this.authenticationService.getProjectDefaultAuthId() : undefined;
 			this.checkCanExecute({ runInInteractiveMode, commandMetadata, projectConfiguration });
 
+			console.log(`create command: \ninteractive: ${runInInteractiveMode}\nmetadata: ${commandMetadata}\nproject: ${projectFolder}\npath: ${this.executionPath}\nlogger: ${this.consoleLogger}`);
 			const command = await this.commandInstanceFactory.create({
 				runInInteractiveMode: runInInteractiveMode,
 				commandMetadata: commandMetadata,
@@ -95,6 +96,7 @@ export default class CommandActionExecutor {
 
 			const commandArguments = this.extractOptionValuesFromArguments(command.commandMetadata.options, args);
 
+			console.log('execute command');
 			const actionResult = await this.executeCommandAction({
 				command: command,
 				arguments: commandArguments,
@@ -103,6 +105,7 @@ export default class CommandActionExecutor {
 				commandUserExtension: commandUserExtension,
 				projectConfiguration: projectConfiguration,
 			});
+			console.log('command result: ' + JSON.stringify(actionResult));
 
 			if (actionResult.status === STATUS.ERROR) {
 				const error = ActionResultUtils.getErrorMessagesString(actionResult);

@@ -31,6 +31,7 @@ export default class CommandInstanceFactory {
 			? (commandMetadata.interactiveGenerator ? commandMetadata.interactiveGenerator : commandMetadata.nonInteractiveGenerator)
 			: commandMetadata.nonInteractiveGenerator;
 
+			console.log(commandGeneratorPath);
 		const Generator = (await import(commandGeneratorPath)).default;
 		const generatorInstance: BaseCommandGenerator<BaseCommandParameters, BaseCommandAnswer> = new Generator({
 			commandMetadata,

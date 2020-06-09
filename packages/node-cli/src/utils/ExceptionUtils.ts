@@ -11,6 +11,7 @@ import { formatErrors } from '../utils/ValidationErrorsFormatter';
 import { InteractiveCommandInfo, NonInteractiveCommandInfo } from '../../types/Metadata';
 
 export function unwrapExceptionMessage(exception: string | CLIException) {
+	console.log(JSON.stringify(exception));
 	return typeof exception === 'string' ? exception : exception.getErrorMessage();
 }
 
